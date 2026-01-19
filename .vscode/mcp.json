@@ -1,0 +1,30 @@
+{
+	"servers": {
+		"better-auth": {
+			"type": "stdio",
+			"command": "npx",
+			"args": [
+				"@better-auth/mcp"
+			]
+		},
+		"nuxt": {
+            "type": "http",
+            "url": "https://nuxt.com/mcp"
+        },
+        "sequential-thinking": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "@modelcontextprotocol/server-sequential-thinking"
+            ]
+        },
+        "memory": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "@modelcontextprotocol/server-memory"
+            ]
+        }
+	},
+	"inputs": []
+}
