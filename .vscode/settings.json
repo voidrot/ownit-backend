@@ -1,0 +1,19 @@
+{
+  "github.copilot.chat.commitMessageGeneration.instructions": [
+    {
+      "text": "Use conventional commit format: type(scope): description."
+    },
+    {
+      "text": "Use imperative mood."
+    },
+    {
+      "text": "Keep subject line under 72 characters."
+    },
+    {
+      "text": "Types must be one of: feat, fix, docs, style, refactor, perf, test, chore, ci."
+    },
+    {
+      "text": "Include scope when relevant."
+    }
+  ]
+}
