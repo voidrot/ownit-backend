@@ -5,10 +5,12 @@ import { passkey } from "@better-auth/passkey"
 import { admin } from "better-auth/plugins"
 import { openAPI } from "better-auth/plugins"
 import { expo } from "@better-auth/expo"
+import { authSchema } from "../db/schema";
 
 export const auth = betterAuth({
     database: drizzleAdapter(db, {
         provider: "pg", // or "mysql", "sqlite"
+        schema: authSchema
     }),
     emailAndPassword: {
         enabled: true,
@@ -17,10 +19,12 @@ export const auth = betterAuth({
         passkey(),
         admin(),
         openAPI(),
-        expo()
+        expo(),
     ],
     trustedOrigins: [
       "homebase://",
-      "exp://"
-    ]
+      "exp://",
+      "http://localhost:3000",
+      "http://127.0.0.1:3000",
+    ].concat(process.env.HOMEBASE_TRUSTED_ORIGINS ? process.env.HOMEBASE_TRUSTED_ORIGINS.split(",") : []),
 });
