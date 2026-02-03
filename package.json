@@ -23,8 +23,8 @@
     "@nuxt/a11y": "1.0.0-alpha.1",
     "@nuxt/content": "3.11.0",
     "@nuxt/eslint": "1.12.1",
-    "@nuxt/fonts": "0.12.1",
-    "@nuxt/hints": "1.0.0-alpha.5",
+    "@nuxt/fonts": "0.13.0",
+    "@nuxt/hints": "1.0.0-alpha.6",
     "@nuxt/icon": "2.2.0",
     "@nuxt/image": "2.0.0",
     "@nuxt/scripts": "0.13.2",
@@ -42,7 +42,7 @@
     "pg": "^8.17.1",
     "tailwindcss": "^4.1.18",
     "vue": "^3.5.26",
-    "vue-router": "^4.6.4"
+    "vue-router": "^5.0.2"
   },
   "devDependencies": {
     "@types/pg": "^8.16.0",

@@ -1,4 +1,4 @@
-import { createAuthClient } from "better-auth/client"
+import { createAuthClient } from "better-auth/vue"
 import { passkeyClient } from "@better-auth/passkey/client"
 import { adminClient } from "better-auth/client/plugins"
 export const authClient = createAuthClient({
@@ -7,12 +7,3 @@ export const authClient = createAuthClient({
       passkeyClient()
     ]
 })
-
-export const {
-	signIn,
-	signOut,
-	signUp,
-	useSession,
-	resetPassword,
-	deleteUser
-} = authClient

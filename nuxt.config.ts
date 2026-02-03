@@ -6,8 +6,13 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   future: { compatibilityVersion: 4 },
 
+  devServer: {
+    host: '0.0.0.0',
+    port: 3000
+  },
+
   modules: [
-    '@nuxt/a11y',
+    // '@nuxt/a11y',
     '@nuxt/eslint',
     '@nuxt/fonts',
     '@nuxt/hints',

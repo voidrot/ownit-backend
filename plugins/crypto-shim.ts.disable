@@ -1,0 +1,48 @@
+export default defineNuxtPlugin(() => {
+  // Server-side: try to use Node's crypto.randomUUID or randomBytes
+  if (typeof window === 'undefined') {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const nodeCrypto = require('crypto')
+      if (!globalThis.crypto) (globalThis as any).crypto = {}
+      if (typeof (globalThis as any).crypto.randomUUID !== 'function') {
+        if (typeof nodeCrypto.randomUUID === 'function') {
+          ;(globalThis as any).crypto.randomUUID = nodeCrypto.randomUUID.bind(nodeCrypto)
+        } else if (typeof nodeCrypto.randomBytes === 'function') {
+          ;(globalThis as any).crypto.randomUUID = () => {
+            const bytes = nodeCrypto.randomBytes(16)
+            bytes[6] = (bytes[6] & 0x0f) | 0x40
+            bytes[8] = (bytes[8] & 0x3f) | 0x80
+            const hex = bytes.toString('hex')
+            return `${hex.substring(0,8)}-${hex.substring(8,12)}-${hex.substring(12,16)}-${hex.substring(16,20)}-${hex.substring(20)}`
+          }
+        }
+      }
+    } catch (e) {
+      // ignore - leave crypto as-is
+      // console.debug('crypto-shim server init failed', e)
+    }
+    return
+  }
+
+  // Client-side: use Web Crypto API getRandomValues to polyfill if needed
+  try {
+    if (typeof globalThis.crypto === 'undefined') return
+    if (typeof (globalThis as any).crypto.randomUUID !== 'function') {
+      if (typeof (globalThis as any).crypto.getRandomValues === 'function') {
+        ;(globalThis as any).crypto.randomUUID = function uuidv4() {
+          const bytes = new Uint8Array(16)
+          ;(globalThis as any).crypto.getRandomValues(bytes)
+          bytes[6] = (bytes[6] & 0x0f) | 0x40
+          bytes[8] = (bytes[8] & 0x3f) | 0x80
+          const toHex = (b: number) => b.toString(16).padStart(2, '0')
+          const s = Array.from(bytes, toHex).join('')
+          return `${s.substring(0,8)}-${s.substring(8,12)}-${s.substring(12,16)}-${s.substring(16,20)}-${s.substring(20)}`
+        }
+      }
+    }
+  } catch (e) {
+    // ignore client shim errors
+    // console.debug('crypto-shim client init failed', e)
+  }
+})

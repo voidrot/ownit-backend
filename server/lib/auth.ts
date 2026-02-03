@@ -8,23 +8,35 @@ import { expo } from "@better-auth/expo"
 import { authSchema } from "../db/schema";
 
 export const auth = betterAuth({
-    database: drizzleAdapter(db, {
-        provider: "pg", // or "mysql", "sqlite"
-        schema: authSchema
+  // advanced: {
+  //   database: {
+  //     generateId: (options) => {
+  //       if (options.model === "passkey") {
+  //         return false; // Let the DB handle UUID generation
+  //       }
+  //       return crypto.randomUUID(); // UUIDs for other tables
+  //     },
+  //   },
+  // },
+  database: drizzleAdapter(db, {
+    provider: "pg", // or "mysql", "sqlite"
+    schema: authSchema
+  }),
+  emailAndPassword: {
+    enabled: true,
+  },
+  plugins: [
+    passkey(),
+    admin({
+      adminRoles: ['admin']
     }),
-    emailAndPassword: {
-        enabled: true,
-    },
-    plugins: [
-        passkey(),
-        admin(),
-        openAPI(),
-        expo(),
-    ],
-    trustedOrigins: [
-      "homebase://",
-      "exp://",
-      "http://localhost:3000",
-      "http://127.0.0.1:3000",
-    ].concat(process.env.HOMEBASE_TRUSTED_ORIGINS ? process.env.HOMEBASE_TRUSTED_ORIGINS.split(",") : []),
+    openAPI(),
+    expo(),
+  ],
+  trustedOrigins: [
+    "ownit://",
+    "exp://",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+  ].concat(process.env.HOMEBASE_TRUSTED_ORIGINS ? process.env.HOMEBASE_TRUSTED_ORIGINS.split(",") : []),
 });
