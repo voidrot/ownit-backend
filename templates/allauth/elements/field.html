@@ -1,0 +1,43 @@
+{% load allauth form_tags %}
+{% with field=attrs.bound_field %}
+    <div class="form-control w-full mb-3">
+        {% if field.widget_type == 'checkbox' %}
+            <label class="label cursor-pointer justify-start gap-4">
+                {% if field.errors %}
+                    {{ field|add_class:"checkbox checkbox-primary checkbox-error" }}
+                {% else %}
+                    {{ field|add_class:"checkbox checkbox-primary" }}
+                {% endif %}
+                <span class="label-text">{{ field.label }}</span>
+            </label>
+        {% else %}
+            <label class="label">
+                <span class="label-text">{{ field.label }}</span>
+            </label>
+            {% if field.errors %}
+                {{ field|add_class:"input input-bordered input-error w-full" }}
+            {% else %}
+                {{ field|add_class:"input input-bordered w-full" }}
+            {% endif %}
+        {% endif %}
+        <div class="label flex-col items-start gap-1">
+            {% if field.help_text %}
+                {% if 'password' not in field.name %}
+                    <span class="label-text-alt text-base-content/70 text-left">{{ field.help_text }}</span>
+                {% endif %}
+            {% endif %}
+            {% if 'password' in field.name %}
+                <ul class="password-requirements list-disc list-inside text-xs text-base-content/50 mt-1">
+                    <li data-rule="length">At least 8 characters</li>
+                    <li data-rule="numeric">Cannot be entirely numeric</li>
+                    <!-- <li data-rule="common">Not a common password</li> -->
+                </ul>
+            {% endif %}
+            {% if field.errors %}
+                {% for error in field.errors %}
+                    <span class="label-text-alt text-error text-right flex-1 w-full">{{ error }}</span>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+{% endwith %}

@@ -1,0 +1,4 @@
+{% load allauth %}
+{% for field in attrs.form %}
+    {% element field bound_field=field %}{% endelement %}
+{% endfor %}

@@ -1,0 +1,11 @@
+from django.contrib.auth.models import AbstractUser
+
+
+class User(AbstractUser):
+    """
+    Default custom user model for project_name.
+    If adding fields that need to be filled at user signup,
+    check forms.SignupForm and forms.SocialSignupForms accordingly.
+    """
+
+    pass

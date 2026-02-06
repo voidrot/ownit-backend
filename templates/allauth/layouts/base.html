@@ -1,0 +1,39 @@
+{% load static tailwind_cli %}
+{% load django_htmx %}
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>
+            {% block head_title %}{% endblock %}
+            | Django Starter
+        </title>
+        <!-- Tailwind CSS -->
+        {% tailwind_css %}
+        <!-- HTMX -->
+        {% django_htmx_script %}
+        {% block extra_head %}{% endblock %}
+    </head>
+    <body class="min-h-screen flex flex-col bg-base-100 text-base-content"
+          hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+        <!-- Global Messages/Toasts -->
+        {% if messages %}
+            <div class="toast toast-top toast-end z-50">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags|default:'info' }}">
+                        <span>{{ message }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        <!-- Main Content (Standalone) -->
+        <main class="flex-grow container mx-auto px-4 py-8 flex items-center justify-center">
+            {% block allauth_wrapper %}
+                {% block content %}{% endblock %}
+            {% endblock %}
+        </main>
+        {% block extra_body %}{% endblock %}
+        {% block extra_script %}{% endblock %}
+    </body>
+</html>

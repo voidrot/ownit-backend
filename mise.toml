@@ -1,0 +1,47 @@
+[tools]
+pre-commit = "latest"
+python = "3.14"
+uv = "latest"
+
+[env]
+PYTHONDONTWRITEBYTECODE = "1"
+PYTHONUNBUFFERED = "1"
+_.file = ".env"
+_.python.venv = { path = ".venv", create = true }
+_.path = ".venv/bin"
+
+[tasks]
+install = { run = "uv sync", description = "Install dependencies" }
+serve = { run = "uv run python manage.py tailwind runserver", description = "Run development server with Tailwind" }
+celery-worker = { run = "uv run celery -A config worker -l info", description = "Run celery worker" }
+celery-beat = { run = "uv run celery -A config beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler", description = "Run celery beat" }
+flower = { run = "uv run celery -A config flower", description = "Run flower" }
+tailwind-watch = { run = "uv run python manage.py tailwind watch", description = "Watch Tailwind changes" }
+tailwind-build = { run = "uv run python manage.py tailwind build", description = "Build Tailwind CSS" }
+test = { run = "uv run pytest", env = { DJANGO_ENV = "testing" }, description = "Run tests" }
+test-e2e = { run = "uv run pytest e2e", env = { DJANGO_ENV = "testing" }, description = "Run E2E tests" }
+lint = { run = [
+  "uv run ruff check .",
+  "uv run djlint . --check",
+  "uv run pyrefly check --summarize-errors",
+], description = "Run linting (Ruff + djlint + pyrefly)" }
+lint-types = { run = [
+  "uv run pyrefly check --summarize-errors",
+], description = "Run type linting (pyrefly)" }
+format = { run = [
+  "uv run ruff format .",
+  "uv run djlint . --reformat",
+], description = "Format code (Ruff + djlint)" }
+clean = { run = 'find . -type d -name "__pycache__" -exec rm -rf {} +', description = "Clean pycache" }
+docker-build = { run = "docker compose build", description = "Build docker images" }
+docker-up = { run = "docker compose -f compose.dev.yml up -d", description = "Start docker stack" }
+migrate = { run = "uv run python manage.py migrate", description = "Run database migrations" }
+dev = { run = [
+  { task = "docker-up" },
+  { task = "migrate"},
+  { tasks = [
+    "serve",
+    "celery-worker",
+    "celery-beat",
+  ] }
+], description = "Run development environment (Docker + Django + Celery)" }

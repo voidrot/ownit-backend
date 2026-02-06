@@ -1,0 +1,13 @@
+{% extends "allauth/layouts/base.html" %}
+{% load allauth %}
+{% block allauth_wrapper %}
+    <div class="flex min-h-[calc(100vh-10rem)] items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div class="w-full max-w-lg text-center">
+            <div class="card bg-base-100 shadow-xl border border-base-200">
+                <div class="card-body text-left">
+                    {% block content %}{% endblock %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

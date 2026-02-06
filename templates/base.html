@@ -1,0 +1,63 @@
+{% load static tailwind_cli %}
+{% load django_htmx %}
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>
+            {% block title %}Django Starter{% endblock %}
+        </title>
+        <!-- Tailwind CSS -->
+        {% tailwind_css %}
+        <!-- HTMX -->
+        {% django_htmx_script %}
+        {% block extra_head %}{% endblock %}
+    </head>
+    <body class="min-h-screen flex flex-col bg-base-100 text-base-content"
+          hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+        <!-- Global Messages/Toasts -->
+        {% if messages %}
+            <div class="toast toast-top toast-end z-50">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags|default:'info' }}">
+                        <span>{{ message }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        <!-- Navbar -->
+        <header class="navbar bg-base-100 shadow-sm">
+            <div class="flex-1">
+                <a href="{% url 'admin:index' %}" class="btn btn-ghost text-xl">Django Starter</a>
+            </div>
+            <div class="flex-none">
+                <ul class="menu menu-horizontal px-1">
+                    {% if user.is_authenticated %}
+                        <li>
+                            <a href="{% url 'account_logout' %}">Logout</a>
+                        </li>
+                    {% else %}
+                        <li>
+                            <a href="{% url 'account_login' %}">Login</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'account_signup' %}">Sign Up</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </header>
+        <!-- Main Content -->
+        <main class="flex-grow container mx-auto px-4 py-8">
+            {% block content %}{% endblock %}
+        </main>
+        <!-- Footer -->
+        <footer class="footer footer-center p-4 bg-base-300 text-base-content">
+            <aside>
+                <p>Copyright © {% now "Y" %} - All right reserved by Your Company</p>
+            </aside>
+        </footer>
+        {% block extra_script %}{% endblock %}
+    </body>
+</html>

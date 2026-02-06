@@ -1,0 +1,40 @@
+{% extends "account/base_entrance.html" %}
+{% load i18n %}
+{% load allauth %}
+{% block head_title %}
+    {% trans "Signup" %}
+{% endblock head_title %}
+{% block extra_head %}
+    {{ block.super }}
+    <script src="/static/js/password_validator.js" defer></script>
+{% endblock extra_head %}
+{% block content %}
+    {% element h1 %}
+    {% trans "Sign Up" %}
+{% endelement %}
+{% url 'account_signup' as signup_url %}
+{% url 'account_login' as login_url %}
+{% element p %}
+{% blocktrans %}Already have an account? Then please <a href="{{ login_url }}">sign in</a>.{% endblocktrans %}
+{% endelement %}
+{% element form form=form id="signup_form" method="post" action=signup_url %}
+{% slot body %}
+{% csrf_token %}
+{% element fields form=form unlabeled=True %}
+{% endelement %}
+{% if redirect_field_value %}
+    <input type="hidden"
+           name="{{ redirect_field_name }}"
+           value="{{ redirect_field_value }}" />
+{% endif %}
+{% endslot %}
+{% slot actions %}
+{% element button tags="prominent,signup" type="submit" %}
+{% trans "Sign Up" %}
+{% endelement %}
+{% endslot %}
+{% endelement %}
+{% if socialaccount_providers %}
+    {% include "socialaccount/snippets/provider_list.html" with process="login" %}
+{% endif %}
+{% endblock content %}

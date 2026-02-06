@@ -1,0 +1,7 @@
+{% load allauth %}
+{% with type=attrs.type %}
+    <div role="alert"
+         class="alert alert-{{ type|default:'info' }} mb-4 shadow-sm">
+        <span>{% slot %}{% endslot %}</span>
+    </div>
+{% endwith %}
