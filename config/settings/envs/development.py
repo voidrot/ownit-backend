@@ -24,7 +24,7 @@ DEBUG_TOOLBAR_CONFIG = {
     'SHOW_TOOLBAR_CALLBACK': show_toolbar,
 }
 
-ALLOWED_HOSTS = ['localhost', '0.0.0.0', '127.0.0.1']
+ALLOWED_HOSTS = ['*']
 
 # Print emails to console
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

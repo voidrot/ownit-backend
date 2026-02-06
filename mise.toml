@@ -12,7 +12,7 @@ _.path = ".venv/bin"
 
 [tasks]
 install = { run = "uv sync", description = "Install dependencies" }
-serve = { run = "uv run python manage.py tailwind runserver", description = "Run development server with Tailwind" }
+serve = { run = "uv run python manage.py tailwind runserver 0.0.0.0:8000", description = "Run development server with Tailwind" }
 celery-worker = { run = "uv run celery -A config worker -l info", description = "Run celery worker" }
 celery-beat = { run = "uv run celery -A config beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler", description = "Run celery beat" }
 flower = { run = "uv run celery -A config flower", description = "Run flower" }

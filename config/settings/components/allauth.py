@@ -12,3 +12,6 @@ LOGIN_REDIRECT_URL = '/'
 
 HEADLESS_ONLY = False
 HEADLESS_SERVE_SPECIFICATION = DEBUG
+
+# django-allauth headless adapter
+HEADLESS_ADAPTER = 'apps.users.headless_adapter.GroupAwareHeadlessAdapter'
