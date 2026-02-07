@@ -210,7 +210,8 @@
                                             {% endif %}
                                         </div>
                                     </div>
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start mt-2" id="chore-age-controls">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start mt-2"
+                                         id="chore-age-controls">
                                         <div class="flex flex-col gap-2">
                                             <div>
                                                 {{ chore_form.age_restricted }}
@@ -222,7 +223,9 @@
                                             <div>
                                                 {{ chore_form.assign_to_all }}
                                                 {{ chore_form.assign_to_all.label_tag }}
-                                                <span class="ml-2 tooltip tooltip-top" data-tip="Assign this chore to all children by default." aria-hidden="true">?</span>
+                                                <span class="ml-2 tooltip tooltip-top"
+                                                      data-tip="Assign this chore to all children by default."
+                                                      aria-hidden="true">?</span>
                                                 {% if chore_form.assign_to_all.errors %}
                                                     <p class="text-error text-sm mt-1">{{ chore_form.assign_to_all.errors|join:' ' }}</p>
                                                 {% endif %}
@@ -230,13 +233,14 @@
                                             <div>
                                                 {{ chore_form.disabled }}
                                                 {{ chore_form.disabled.label_tag }}
-                                                <span class="ml-2 tooltip tooltip-top" data-tip="When checked, this chore will be disabled and not assigned." aria-hidden="true">?</span>
+                                                <span class="ml-2 tooltip tooltip-top"
+                                                      data-tip="When checked, this chore will be disabled and not assigned."
+                                                      aria-hidden="true">?</span>
                                                 {% if chore_form.disabled.errors %}
                                                     <p class="text-error text-sm mt-1">{{ chore_form.disabled.errors|join:' ' }}</p>
                                                 {% endif %}
                                             </div>
                                         </div>
-
                                         <div class="w-40" id="chore-minimum-age-container">
                                             {{ chore_form.minimum_age.label_tag }}
                                             {{ chore_form.minimum_age }}
@@ -571,25 +575,19 @@
                                                             </div>
                                                         </div>
                                                         <div class="flex items-center gap-2 flex-shrink-0 whitespace-nowrap">
-                                                            {% if chore.age_restricted %}
-                                                                <span class="badge badge-error mr-2">Age Restricted</span>
-                                                            {% endif %}
-                                                            {% if chore.assign_to_all %}
-                                                                <span class="badge badge-success mr-2">Assign to All</span>
-                                                            {% endif %}
-                                                            {% if chore.disabled %}
-                                                                <span class="badge badge-warning mr-2">Disabled</span>
-                                                            {% endif %}
+                                                            {% if chore.age_restricted %}<span class="badge badge-error mr-2">Age Restricted</span>{% endif %}
+                                                            {% if chore.assign_to_all %}<span class="badge badge-success mr-2">Assign to All</span>{% endif %}
+                                                            {% if chore.disabled %}<span class="badge badge-warning mr-2">Disabled</span>{% endif %}
                                                             <div class="stats stats-horizontal items-center gap-2 text-sm p-0">
                                                                 <div class="stat p-0">
                                                                     <div class="stat-title">Points</div>
                                                                     <div class="stat-value text-sm leading-tight">{{ chore.points }} pts</div>
                                                                 </div>
                                                                 {% if chore.location %}
-                                                                <div class="stat p-0">
-                                                                    <div class="stat-title">Location</div>
-                                                                    <div class="stat-value text-sm leading-tight">{{ chore.location.name }}</div>
-                                                                </div>
+                                                                    <div class="stat p-0">
+                                                                        <div class="stat-title">Location</div>
+                                                                        <div class="stat-value text-sm leading-tight">{{ chore.location.name }}</div>
+                                                                    </div>
                                                                 {% endif %}
                                                             </div>
                                                             <a href="#"
@@ -661,9 +659,7 @@
                                                                 {% if chore.age_restricted %}
                                                                     <div class="mt-3">
                                                                         <h3 class="font-medium">Age Restriction</h3>
-                                                                        <p class="text-sm text-muted">
-                                                                            Minimum age: {{ chore.minimum_age }} years
-                                                                        </p>
+                                                                        <p class="text-sm text-muted">Minimum age: {{ chore.minimum_age }} years</p>
                                                                     </div>
                                                                 {% endif %}
                                                                 <div class="mt-3">

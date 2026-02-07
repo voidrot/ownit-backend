@@ -1,4 +1,4 @@
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
 from environs import env
 
 
@@ -33,8 +33,7 @@ class Command(BaseCommand):
         """
         Create initial users, groups, and permissions for OwnIt.
         """
-        from django.contrib.auth.models import Group, Permission
-        from django.contrib.contenttypes.models import ContentType
+        from django.contrib.auth.models import Group
         from apps.users.models import User
 
         # Create initial superuser

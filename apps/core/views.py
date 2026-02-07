@@ -9,10 +9,7 @@ from allauth.account.utils import setup_user_email
 from allauth.account.models import EmailAddress
 from django.views.decorators.http import require_POST
 from django.views.decorators.http import require_GET
-from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.csrf import csrf_exempt
-from django.shortcuts import reverse
 from apps.chores.models import Chore, Location, Equipment, Task
 from apps.chores.forms import ChoreForm, LocationForm, EquipmentForm, TaskForm
 from django.http import HttpResponseBadRequest
@@ -196,7 +193,7 @@ def delete_location(request, location_id):
 def create_location(request):
     form = LocationForm(request.POST)
     if form.is_valid():
-        loc = form.save()
+        form.save()
         return redirect('core:chores')
     # Return structured form errors to help debugging in client
     try:
@@ -246,7 +243,7 @@ def create_equipment(request):
     # Backwards-compatible create endpoint; prefer save_equipment for AJAX upserts
     form = EquipmentForm(request.POST, request.FILES)
     if form.is_valid():
-        eq = form.save()
+        form.save()
         return redirect('core:chores')
     return HttpResponseBadRequest('Invalid equipment')
 
@@ -326,7 +323,7 @@ def delete_equipment(request, equipment_id):
 def create_task(request):
     form = TaskForm(request.POST)
     if form.is_valid():
-        t = form.save()
+        form.save()
         return redirect('core:chores')
     return HttpResponseBadRequest('Invalid task')
 
