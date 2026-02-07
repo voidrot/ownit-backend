@@ -33,6 +33,8 @@ class ChoreForm(forms.ModelForm):
             'notes',
             'points',
             'penalize_incomplete',
+            'age_restricted',
+            'minimum_age',
             'penalty_amount',
             'is_recurring',
             'recurrence',
@@ -63,6 +65,8 @@ class ChoreForm(forms.ModelForm):
             'location': forms.Select(attrs={'class': 'select select-bordered w-full'}),
             'equipment': forms.SelectMultiple(attrs={'class': 'select select-bordered w-full'}),
             'tasks': forms.SelectMultiple(attrs={'class': 'select select-bordered w-full'}),
+            'age_restricted': forms.CheckboxInput(attrs={'class': 'checkbox'}),
+            'minimum_age': forms.NumberInput(attrs={'class': 'input input-bordered w-40', 'min': 0}),
             # notes will be populated by client UI as JSON; keep it hidden
             'notes': forms.HiddenInput(),
         }
@@ -113,6 +117,16 @@ class ChoreForm(forms.ModelForm):
             cleaned['recurrence'] = None
             cleaned['recurrence_day_of_week'] = None
             cleaned['recurrence_day_of_month'] = None
+
+        # Age restriction: ensure consistency between age_restricted and minimum_age
+        age_restricted = cleaned.get('age_restricted')
+        min_age = cleaned.get('minimum_age')
+        if age_restricted:
+            if min_age in (None, ''):
+                raise forms.ValidationError('When age restriction is enabled, please provide a minimum age.')
+        else:
+            # If not age restricted, clear any provided minimum_age to avoid DB constraint errors
+            cleaned['minimum_age'] = None
 
         return cleaned
 

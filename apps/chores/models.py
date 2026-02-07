@@ -68,6 +68,15 @@ class Chore(models.Model):
     )
     notes = models.JSONField(blank=True, null=True, help_text='Optional structured metadata for the chore.')
     time_due = models.TimeField(null=True, blank=True, help_text='Optional time of day when the chore is due.')
+    age_restricted = models.BooleanField(
+        default=False, help_text='Whether this chore should be restricted based on user age.'
+    )
+    minimum_age = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(0)],
+        help_text='Minimum age required to be assigned this chore (if age_restricted is True).',
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -99,6 +108,16 @@ class Chore(models.Model):
             models.CheckConstraint(
                 condition=~models.Q(recurrence='M', recurrence_day_of_week__isnull=False),
                 name='chore_monthly_day_of_week_must_be_null',
+            ),
+            models.CheckConstraint(
+                # minimum_age may have a value only when age_restricted is True
+                condition=~models.Q(minimum_age__isnull=False, age_restricted=False),
+                name='chore_minimum_age_requires_age_restricted',
+            ),
+            models.CheckConstraint(
+                # if age_restricted is True then minimum_age must be set (not null)
+                condition=~models.Q(age_restricted=True, minimum_age__isnull=True),
+                name='chore_age_restricted_requires_minimum_age',
             ),
         ]
 

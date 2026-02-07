@@ -210,6 +210,23 @@
                                             {% endif %}
                                         </div>
                                     </div>
+                                    <div class="flex items-center gap-4 mt-2" id="chore-age-controls">
+                                        <div>
+                                            {{ chore_form.age_restricted }}
+                                            {{ chore_form.age_restricted.label_tag }}
+                                            {% if chore_form.age_restricted.errors %}
+                                                <p class="text-error text-sm mt-1">{{ chore_form.age_restricted.errors|join:' ' }}</p>
+                                            {% endif %}
+                                        </div>
+                                        <div class="w-40" id="chore-minimum-age-container">
+                                            {{ chore_form.minimum_age.label_tag }}
+                                            {{ chore_form.minimum_age }}
+                                            {% if chore_form.minimum_age.errors %}
+                                                <p class="text-error text-sm mt-1">{{ chore_form.minimum_age.errors|join:' ' }}</p>
+                                            {% endif %}
+                                            <p class="text-sm text-muted mt-1">Set the minimum age required to be assigned this chore.</p>
+                                        </div>
+                                    </div>
                                     <div class="mt-2">
                                         <div class="collapse">
                                             <input id="collapse-instructions-video-toggle"
@@ -537,6 +554,9 @@
                                                         <div class="flex items-center gap-2 flex-shrink-0 whitespace-nowrap">
                                                             <span class="text-sm text-muted mr-2">{{ chore.points }} pts</span>
                                                             {% if chore.location %}<span class="text-sm text-muted mr-2">{{ chore.location.name }}</span>{% endif %}
+                                                            {% if chore.age_restricted %}
+                                                                <span class="badge badge-error ml-2">Age Restricted</span>
+                                                            {% endif %}
                                                             <a href="#"
                                                                class="btn btn-sm btn-ghost"
                                                                data-action="open-edit-chore"
@@ -603,6 +623,14 @@
                                                                         {% endif %}
                                                                     </p>
                                                                 </div>
+                                                                {% if chore.age_restricted %}
+                                                                    <div class="mt-3">
+                                                                        <h3 class="font-medium">Age Restriction</h3>
+                                                                        <p class="text-sm text-muted">
+                                                                            Minimum age: {{ chore.minimum_age }} years
+                                                                        </p>
+                                                                    </div>
+                                                                {% endif %}
                                                                 {% if chore.instructions_video or chore.instructions_video_source %}
                                                                     <div>
                                                                         <h3 class="font-medium">Instructional Video</h3>
@@ -936,4 +964,5 @@
     <script src="{% static 'js/notes-ui.js' %}"></script>
     <script src="{% static 'js/steps-ui.js' %}"></script>
     <script src="{% static 'js/multi-select-filter.js' %}"></script>
+    <script src="{% static 'js/chore-age-toggle.js' %}"></script>
 {% endblock %}

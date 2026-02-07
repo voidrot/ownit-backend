@@ -55,6 +55,42 @@ function renderFieldErrors(errors) {
   } catch (e) { console.warn('renderFieldErrors failed', e); }
 }
 
+// Remove any edit-related query params from the current URL without reloading
+function clearEditQueryParams() {
+  try {
+    const url = new URL(window.location.href);
+    const params = url.searchParams;
+    let changed = false;
+    ['edit', 'edit_location', 'edit_equipment', 'edit_task'].forEach(k => {
+      if (params.has(k)) { params.delete(k); changed = true; }
+    });
+    if (changed) {
+      // Use replaceState so browser history doesn't get polluted
+      const newUrl = url.pathname + (params.toString() ? '?' + params.toString() : '');
+      window.history.replaceState({}, document.title, newUrl);
+    }
+    // Also clear any notes UI state across quick-add panels so residual notes don't persist
+    try {
+      if (window._notesPanels && typeof window._notesPanels === 'object') {
+        Object.keys(window._notesPanels).forEach(function (panelName) {
+          try {
+            const panelApi = window._notesPanels[panelName];
+            if (panelApi && typeof panelApi.clear === 'function') panelApi.clear();
+            // Also clear any hidden input fallback
+            const panelEl = document.querySelector('.quick-add-panel[data-panel="' + panelName + '"]');
+            if (panelEl) {
+              const hidden = panelEl.querySelector('input[name="notes"]');
+              if (hidden) hidden.value = JSON.stringify([]);
+              const list = panelEl.querySelector('#' + panelName + '-notes-list');
+              if (list) list.innerHTML = '';
+            }
+          } catch (e) { /* ignore per-panel errors */ }
+        });
+      }
+    } catch (e) { /* ignore */ }
+  } catch (e) { /* ignore */ }
+}
+
 // Simple cookie helper to read CSRF token; fallback used by AJAX submitters.
 function getCookie(name) {
   try {
@@ -432,9 +468,44 @@ function openEditTask(id) {
                       const idHidden = taskForm.querySelector('input[name="id"]'); if (idHidden) idHidden.remove();
                       const submitBtn = taskForm.querySelector('button[type="submit"]'); if (submitBtn) submitBtn.textContent = 'Add Task';
                       if (window._notesPanels && window._notesPanels['task'] && typeof window._notesPanels['task'].clear === 'function') window._notesPanels['task'].clear();
+                      // Ensure notes UI and hidden inputs are fully cleared
+                      try {
+                        if (window._notesPanels && window._notesPanels['task'] && typeof window._notesPanels['task'].setNotes === 'function') {
+                          window._notesPanels['task'].setNotes([]);
+                        } else if (window._notesPanels && window._notesPanels['task'] && typeof window._notesPanels['task'].clear === 'function') {
+                          window._notesPanels['task'].clear();
+                        }
+                      } catch (e) { /* ignore */ }
                       const notesList = taskForm.querySelector('#task-notes-list'); if (notesList) notesList.innerHTML = '';
+                      try {
+                        const hiddenNotes = taskForm.querySelector('input[name="notes"], textarea[name="notes"]');
+                        if (hiddenNotes) {
+                          hiddenNotes.value = JSON.stringify([]);
+                          try { hiddenNotes.defaultValue = JSON.stringify([]); } catch (e) { }
+                        }
+                      } catch (e) { /* ignore */ }
                       const stepsList = taskForm.querySelector('#task-steps-list'); if (stepsList) stepsList.innerHTML = '';
+                      // Clear any shared task steps UI and reset hidden steps input
+                      try {
+                        if (window._taskStepsUI && typeof window._taskStepsUI.setSteps === 'function') {
+                          window._taskStepsUI.setSteps([]);
+                        }
+                      } catch (e) { /* ignore */ }
+                      try {
+                        const hiddenSteps = taskForm.querySelector('input[name="steps"], textarea[name="steps"]');
+                        if (hiddenSteps) {
+                          hiddenSteps.value = JSON.stringify([]);
+                          try { hiddenSteps.defaultValue = JSON.stringify([]); } catch (e) { }
+                        }
+                      } catch (e) { /* ignore */ }
                       const tToggle = document.getElementById('collapse-tasks-toggle'); if (tToggle && !tToggle.checked) tToggle.checked = true;
+                      // Ensure hidden notes input is cleared so subsequent submits don't reuse old notes
+                      try {
+                        const hiddenNotes = taskForm.querySelector('input[name="notes"]');
+                        if (hiddenNotes) hiddenNotes.value = JSON.stringify([]);
+                      } catch (e) { /* ignore */ }
+                      // Remove any edit query params from the URL now that the save completed
+                      clearEditQueryParams();
                     } else if (body && body.errors) {
                       renderNonFieldErrors(body.errors);
                       renderFieldErrors(body.errors);
@@ -903,6 +974,8 @@ function openEditTask(id) {
         // optionally collapse the locations section open so user sees new/updated
         const locToggle = document.getElementById('collapse-locations-toggle');
         if (locToggle && !locToggle.checked) locToggle.checked = true;
+        // Remove any edit query params from the URL now that the save completed
+        clearEditQueryParams();
       } else if (body && body.errors) {
         renderNonFieldErrors(body.errors);
         renderFieldErrors(body.errors);
@@ -971,6 +1044,13 @@ function openEditTask(id) {
             // ensure equipment collapse is open so user sees the new/updated item
             const eqToggle = document.getElementById('collapse-equipment-toggle');
             if (eqToggle && !eqToggle.checked) eqToggle.checked = true;
+            // Ensure hidden notes input is cleared so subsequent submits don't reuse old notes
+            try {
+              const hiddenNotesEq = equipForm.querySelector('input[name="notes"]');
+              if (hiddenNotesEq) hiddenNotesEq.value = JSON.stringify([]);
+            } catch (e) { /* ignore */ }
+            // Remove any edit query params from the URL now that the save completed
+            clearEditQueryParams();
           } else if (body && body.errors) {
             renderNonFieldErrors(body.errors);
             renderFieldErrors(body.errors);
