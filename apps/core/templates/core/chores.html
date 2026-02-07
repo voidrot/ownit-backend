@@ -37,17 +37,12 @@
                                       class="mt-0 space-y-3"
                                       enctype="multipart/form-data">
                                     {% csrf_token %}
-                                    {% if chore_form.non_field_errors %}
-                                        <div class="alert alert-error mb-2">
-                                            <ul class="list-disc list-inside">
-                                                {% for err in chore_form.non_field_errors %}<li>{{ err }}</li>{% endfor %}
-                                            </ul>
-                                        </div>
-                                    {% endif %}
                                     <div>
                                         {{ chore_form.name.label_tag }}
                                         {{ chore_form.name }}
-                                        {% if chore_form.name.errors %}<p class="text-error text-sm mt-1">{{ chore_form.name.errors|join:' ' }}</p>{% endif %}
+                                        {% if chore_form.name.errors %}
+                                            <p class="text-error text-sm mt-1">{{ chore_form.name.errors|join:' ' }}</p>
+                                        {% endif %}
                                     </div>
                                     <div>
                                         {{ chore_form.description.label_tag }}
@@ -320,7 +315,8 @@
                             <div class="quick-add-panel hidden" data-panel="equipment">
                                 <form method="post"
                                       action="{% url 'core:create_equipment' %}"
-                                      class="space-y-2">
+                                      class="space-y-2"
+                                      enctype="multipart/form-data">
                                     {% csrf_token %}
                                     <div>
                                         {{ equipment_form.name.label_tag }}
@@ -344,6 +340,26 @@
                                         {% endif %}
                                     </div>
                                     <div>
+                                        <label class="block">Image</label>
+                                        <div id="equipment-image-preview" class="mb-2">
+                                            {% if equipment_form.instance and equipment_form.instance.pk and equipment_form.instance.image %}
+                                                <div class="flex items-center gap-3">
+                                                    <img src="{{ equipment_form.instance.image.url }}"
+                                                         alt="{{ equipment_form.instance.name }}"
+                                                         class="w-16 h-12 object-cover rounded" />
+                                                    <label class="inline-flex items-center gap-2">
+                                                        <input type="checkbox" name="remove_image" value="1" />
+                                                        <span class="text-sm">Remove existing image</span>
+                                                    </label>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <input type="file" name="image" id="equipment-image" accept="image/*" class="file-input file-input-bordered w-full" />
+                                        {% if equipment_form.image.errors %}
+                                            <p class="text-error text-sm mt-1">{{ equipment_form.image.errors|join:' ' }}</p>
+                                        {% endif %}
+                                    </div>
+                                    <div>
                                         <label class="block">Notes</label>
                                         <div id="equipment-notes-inputs" class="space-y-2">
                                             <div class="flex gap-2">
@@ -363,7 +379,9 @@
                                         {% endif %}
                                     </div>
                                     <div class="mt-2">
-                                        <button class="btn btn-sm btn-primary" type="submit">Add Equipment</button>
+                                        <button class="btn btn-sm btn-primary" type="submit">
+                                            {% if equipment_form.instance and equipment_form.instance.pk %}Update Equipment{% else %}Add Equipment{% endif %}
+                                        </button>
                                     </div>
                                 </form>
                             </div>
@@ -500,19 +518,19 @@
                                                     {% for e in chore.equipment.all %}<span class="badge badge-outline mr-1">{{ e.name }}</span>{% endfor %}
                                                 </td>
                                                 <td class="text-right">
-                                                    <a href="#"
-                                                       class="btn btn-sm btn-ghost mr-2"
-                                                       data-chore-id="{{ chore.id }}"
-                                                       onclick="openEditChore({{ chore.id }})">Edit</a>
-                                                    <form method="post"
-                                                          action="{% url 'core:delete_chore' chore.id %}"
-                                                          class="inline">
-                                                        {% csrf_token %}
-                                                        <button class="btn btn-sm btn-error"
-                                                                onclick="return confirm('Delete this chore?')">
-                                                            Delete
-                                                        </button>
-                                                    </form>
+                                                    <div class="flex items-center gap-2 justify-end whitespace-nowrap">
+                                                        <a href="#"
+                                                           class="btn btn-sm btn-ghost"
+                                                           data-chore-id="{{ chore.id }}"
+                                                           onclick="openEditChore({{ chore.id }}); return false;">Edit</a>
+                                                        <form method="post"
+                                                              action="{% url 'core:delete_chore' chore.id %}"
+                                                              class="inline"
+                                                              onsubmit="return confirm('Delete this chore?');">
+                                                            {% csrf_token %}
+                                                            <button type="submit" class="btn btn-sm btn-error">Delete</button>
+                                                        </form>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         {% empty %}
@@ -527,7 +545,7 @@
                         </div>
                     </div>
                     <div class="collapse bg-base-200 shadow-sm rounded-lg">
-                        <input id="collapse-tasks-toggle" type="checkbox" class="sr-only" />
+                        <input id="collapse-tasks-toggle" type="radio" name="related-accordion" class="sr-only" checked />
                         <label for="collapse-tasks-toggle" class="collapse-title p-4 cursor-pointer">
                             <div class="flex items-center justify-between">
                                 <h2 class="text-lg font-medium">Tasks</h2>
@@ -539,34 +557,32 @@
                                 <div id="tasks-list">
                                     {% if tasks %}
                                         {% for t in tasks %}
-                                            <div class="collapse card bg-base-100 shadow-sm rounded-lg mb-3"
-                                                 id="task-card-{{ t.id }}">
+                                                <div class="collapse card bg-base-100 shadow-sm rounded-lg mb-3"
+                                                    id="task-card-{{ t.id }}"
+                                                    data-equipment-ids="{% for eq in t.equipment.all %}{% if not forloop.first %},{% endif %}{{ eq.id }}{% endfor %}">
                                                 <input id="collapse-task-{{ t.id }}" type="checkbox" class="sr-only" />
-                                                <label for="collapse-task-{{ t.id }}"
-                                                       class="collapse-title flex items-start justify-between gap-4 cursor-pointer p-4">
+                                                          <label for="collapse-task-{{ t.id }}"
+                                                              class="collapse-title flex items-start justify-between gap-4 cursor-pointer p-4 bg-base-300 border border-base-300 border-b-0 rounded-t-lg">
                                                     <div class="flex-1">
                                                         <div class="font-semibold">{{ t.name }}</div>
                                                         <div class="text-sm text-muted">{{ t.description|truncatechars:140 }}</div>
                                                     </div>
-                                                    <div class="flex items-center gap-2">
+                                                    <div class="flex items-center gap-2 justify-end whitespace-nowrap">
                                                         <a href="#"
                                                            data-action="open-edit-task"
                                                            data-task-id="{{ t.id }}"
-                                                           class="btn btn-ghost btn-link">Edit</a>
+                                                           class="btn btn-sm btn-ghost"
+                                                           onclick="event.stopPropagation(); openEditTask && openEditTask({{ t.id }}); return false;">Edit</a>
                                                         <form method="post"
                                                               action="{% url 'core:delete_task' t.id %}"
                                                               class="inline"
-                                                              onsubmit="event.stopPropagation();">
+                                                              onsubmit="event.stopPropagation(); return confirm('Delete this task?');">
                                                             {% csrf_token %}
-                                                            <button type="submit"
-                                                                    class="btn btn-ghost btn-link text-error"
-                                                                    onclick="event.stopPropagation(); return confirm('Delete this task?')">
-                                                                Delete
-                                                            </button>
+                                                            <button type="submit" class="btn btn-sm btn-error">Delete</button>
                                                         </form>
                                                     </div>
                                                 </label>
-                                                <div class="collapse-content">
+                                                <div class="collapse-content p-0 border-t border-base-200 bg-base-100">
                                                     <div class="grid md:grid-cols-3 gap-4">
                                                         <div class="md:col-span-2">
                                                             {% if t.description %}
@@ -584,8 +600,17 @@
                                                                     {% endfor %}
                                                                 </ul>
                                                             {% endif %}
+                                                            {# equipment moved to the right column (above notes) to improve layout #}
                                                         </div>
                                                         <div class="md:col-span-1">
+                                                            {% if t.equipment.all %}
+                                                                <h3 class="font-medium">Equipment</h3>
+                                                                <p class="text-sm text-muted mb-3">
+                                                                    {% for e in t.equipment.all %}
+                                                                        <span class="badge badge-outline mr-1">{{ e.name }}</span>
+                                                                    {% endfor %}
+                                                                </p>
+                                                            {% endif %}
                                                             <h3 class="font-medium">Notes</h3>
                                                             <div class="text-sm text-muted">
                                                                 {% for n in t.notes %}
@@ -607,7 +632,7 @@
                         </div>
                     </div>
                     <div class="collapse bg-base-200 shadow-sm rounded-lg">
-                        <input id="collapse-equipment-toggle" type="checkbox" class="sr-only" />
+                        <input id="collapse-equipment-toggle" type="radio" name="related-accordion" class="sr-only" />
                         <label for="collapse-equipment-toggle"
                                class="collapse-title p-4 cursor-pointer">
                             <div class="flex items-center justify-between">
@@ -621,18 +646,23 @@
                                     {% for eq in equipment %}
                                         <div class="collapse card bg-base-100 shadow-sm rounded-lg mb-3">
                                             <input id="collapse-equipment-{{ eq.id }}" type="checkbox" class="sr-only" />
-                                            <label for="collapse-equipment-{{ eq.id }}"
-                                                   class="collapse-title p-0 cursor-pointer">
+                                              <label for="collapse-equipment-{{ eq.id }}"
+                                                  class="collapse-title p-0 cursor-pointer bg-base-300 border border-base-300 border-b-0 rounded-t-lg">
                                                 <div class="flex items-center justify-between gap-4 p-4">
-                                                    <div class="flex-1 min-w-0">
-                                                        <h3 class="text-base font-semibold truncate mb-1">{{ eq.name }}</h3>
-                                                        <p class="text-sm text-muted truncate">
-                                                            {% if eq.description %}
-                                                                {{ eq.description|truncatechars:80 }}
-                                                            {% else %}
-                                                                &mdash;
-                                                            {% endif %}
-                                                        </p>
+                                                    <div class="flex items-center gap-3">
+                                                        {% if eq.image %}
+                                                            <img src="{{ eq.image.url }}" alt="{{ eq.name }}" class="w-12 h-12 object-cover rounded flex-shrink-0" />
+                                                        {% endif %}
+                                                        <div class="flex-1 min-w-0">
+                                                            <h3 class="text-base font-semibold truncate mb-1">{{ eq.name }}</h3>
+                                                            <p class="text-sm text-muted truncate">
+                                                                {% if eq.description %}
+                                                                    {{ eq.description|truncatechars:80 }}
+                                                                {% else %}
+                                                                    &mdash;
+                                                                {% endif %}
+                                                            </p>
+                                                        </div>
                                                     </div>
                                                     <div class="flex items-center gap-2 flex-shrink-0 whitespace-nowrap">
                                                         <a href="#"
@@ -675,10 +705,10 @@
                                                                 </p>
                                                             </div>
                                                         </div>
-                                                        <div>
+                                                        <div class="self-start md:col-span-1">
                                                             <h3 class="font-semibold">Notes</h3>
                                                             {% if eq.notes %}
-                                                                <ul class="list-disc list-inside text-sm">
+                                                                <ul class="list-disc list-inside text-sm space-y-1">
                                                                     {% for note in eq.notes %}<li>{{ note }}</li>{% endfor %}
                                                                 </ul>
                                                             {% else %}
@@ -697,7 +727,7 @@
                         </div>
                     </div>
                     <div class="collapse bg-base-200 shadow-sm rounded-lg">
-                        <input id="collapse-locations-toggle" type="checkbox" class="sr-only" />
+                        <input id="collapse-locations-toggle" type="radio" name="related-accordion" class="sr-only" />
                         <label for="collapse-locations-toggle"
                                class="collapse-title p-4 cursor-pointer">
                             <div class="flex items-center justify-between">
@@ -705,14 +735,14 @@
                                 <span class="text-sm text-muted">{{ locations|length }} locations</span>
                             </div>
                         </label>
-                        <div class="collapse-content p-0">
-                            <div class="p-4 space-y-2">
+                                            <div class="collapse-content p-0 border-t border-base-200 bg-base-100">
+                                                <div class="p-4 space-y-2">
                                 {% if locations %}
                                     {% for loc in locations %}
                                         <div class="collapse card bg-base-100 shadow-sm rounded-lg mb-3">
                                             <input id="collapse-location-{{ loc.id }}" type="checkbox" class="sr-only" />
-                                            <label for="collapse-location-{{ loc.id }}"
-                                                   class="collapse-title p-0 cursor-pointer">
+                                              <label for="collapse-location-{{ loc.id }}"
+                                                  class="collapse-title p-0 cursor-pointer bg-base-300 border border-base-300 border-b-0 rounded-t-lg">
                                                 <div class="flex items-center justify-between gap-4 p-4">
                                                     <div class="flex-1 min-w-0">
                                                         <h3 class="text-base font-semibold truncate mb-1">{{ loc.name }}</h3>
@@ -738,7 +768,7 @@
                                                     </div>
                                                 </div>
                                             </label>
-                                            <div class="collapse-content p-0">
+                                            <div class="collapse-content p-0 border-t border-base-200 bg-base-100">
                                                 <div class="card-body">
                                                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                                         <div class="md:col-span-2">

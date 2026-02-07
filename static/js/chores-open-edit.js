@@ -232,6 +232,18 @@ function openEditTask(id) {
                   // Steps are handled above via the shared steps UI; nothing further.
 
                   if (nameInput) nameInput.focus();
+                  // Populate equipment checkbox selections when editing a task
+                  try {
+                    const eqList = data.equipment || [];
+                    const ids = eqList.map(function(i){
+                      if (typeof i === 'object') return (i.id || '').toString();
+                      return String(i);
+                    });
+                    const panelEq = panel.querySelectorAll('.task-equipment-checkbox');
+                    if (panelEq && panelEq.length) {
+                      panelEq.forEach(function(cb){ cb.checked = ids.indexOf(String(cb.value)) !== -1; });
+                    }
+                  } catch (e) { console.warn('task equipment populate failed', e); }
                 })
                 .catch(err => {
                   console.error('openEditTask error', err);
@@ -302,9 +314,17 @@ function openEditTask(id) {
                 t.steps.forEach(s => { const li = document.createElement('li'); li.textContent = s.name + (s.description ? (': ' + s.description) : ''); ul.appendChild(li); });
                 leftCol.appendChild(hsteps); leftCol.appendChild(ul);
               }
+              // equipment will be rendered in the notes column (right) to match template layout
               grid.appendChild(leftCol);
 
               const notesCol = document.createElement('div'); notesCol.className = 'md:col-span-1';
+              // Render equipment above notes
+              if (t.equipment && t.equipment.length) {
+                const heq = document.createElement('h3'); heq.className = 'font-medium'; heq.textContent = 'Equipment'; notesCol.appendChild(heq);
+                const peq = document.createElement('p'); peq.className = 'text-sm text-muted mb-3';
+                t.equipment.forEach(function(eq){ const span = document.createElement('span'); span.className = 'badge badge-outline mr-1'; span.textContent = (eq.name || (eq.title || eq)); peq.appendChild(span); });
+                notesCol.appendChild(peq);
+              }
               const hnotes = document.createElement('h3'); hnotes.className = 'font-medium'; hnotes.textContent = 'Notes'; notesCol.appendChild(hnotes);
               if (t.notes && t.notes.length) {
                 const ul = document.createElement('ul'); ul.className = 'list-disc list-inside text-sm text-muted';
@@ -312,11 +332,11 @@ function openEditTask(id) {
                 notesCol.appendChild(ul);
               } else {
                 const pempty = document.createElement('div'); pempty.className = 'text-sm text-muted'; pempty.textContent = 'No notes'; notesCol.appendChild(pempty);
-                      // Debug: log the steps payload so we can see exactly what's posted
-                      try {
-                        const dbgHidden = taskForm.querySelector('input[name="steps"], textarea[name="steps"]');
-                        if (dbgHidden) console.debug('Task submit steps payload:', dbgHidden.value);
-                      } catch (e) { /* ignore */ }
+                // Debug: log the steps payload so we can see exactly what's posted
+                try {
+                  const dbgHidden = taskForm.querySelector('input[name="steps"], textarea[name="steps"]');
+                  if (dbgHidden) console.debug('Task submit steps payload:', dbgHidden.value);
+                } catch (e) { /* ignore */ }
               }
               grid.appendChild(notesCol);
 
@@ -631,6 +651,41 @@ function openEditTask(id) {
             });
           }
         }
+
+        // Image preview / remove handling for edit flow
+        try {
+          const fileInput = panel.querySelector('input[type="file"][name="image"]');
+          // ensure a preview container exists
+          let preview = panel.querySelector('#equipment-image-preview');
+          if (!preview) {
+            preview = document.createElement('div');
+            preview.id = 'equipment-image-preview';
+            preview.className = 'mb-2';
+            if (fileInput) fileInput.parentNode.insertBefore(preview, fileInput);
+            else panel.querySelector('form').insertBefore(preview, panel.querySelector('form').firstChild);
+          }
+          preview.innerHTML = '';
+          if (data.image_url) {
+            const wrap = document.createElement('div');
+            wrap.className = 'flex items-center gap-3';
+            const img = document.createElement('img');
+            img.src = data.image_url;
+            img.alt = data.name || 'Equipment image';
+            img.className = 'w-24 h-16 object-cover rounded';
+            wrap.appendChild(img);
+            const label = document.createElement('label');
+            label.className = 'inline-flex items-center gap-2';
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.name = 'remove_image';
+            checkbox.value = '1';
+            label.appendChild(checkbox);
+            const span = document.createElement('span'); span.className = 'text-sm'; span.textContent = 'Remove existing image';
+            label.appendChild(span);
+            wrap.appendChild(label);
+            preview.appendChild(wrap);
+          }
+        } catch (e) { console.warn('equipment image preview populate failed', e); }
 
         if (nameInput) nameInput.focus();
       })

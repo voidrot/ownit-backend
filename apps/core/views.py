@@ -61,7 +61,8 @@ def chores_view(request):
     locations = Location.objects.all()
     # Avoid N+1 when accessing equipment.location in templates by joining the FK
     equipment = Equipment.objects.select_related('location').all()
-    tasks = Task.objects.all()
+    # Prefetch equipment (and equipment.location) to avoid N+1 when templates access task.equipment
+    tasks = Task.objects.prefetch_related('equipment__location').all()
     # If ?edit=<id> is present, load that chore into the form for editing
     edit_id = request.GET.get('edit')
     if edit_id:
@@ -81,6 +82,14 @@ def chores_view(request):
         location_form = LocationForm()
     equipment_form = EquipmentForm()
     task_form = TaskForm()
+    # If ?edit_equipment=<id> requested, prefill equipment_form for server-side edit flow
+    edit_eq_id = request.GET.get('edit_equipment')
+    if edit_eq_id:
+        try:
+            edit_eq = get_object_or_404(Equipment, id=edit_eq_id)
+            equipment_form = EquipmentForm(instance=edit_eq)
+        except Exception:
+            equipment_form = EquipmentForm()
     return render(
         request,
         'core/chores.html',
@@ -121,7 +130,8 @@ def save_chore(request):
         chores = Chore.objects.select_related('location').prefetch_related('equipment', 'tasks').all()
         locations = Location.objects.all()
         equipment = Equipment.objects.all()
-        tasks = Task.objects.all()
+        # Keep the same prefetch semantics when re-rendering on form errors
+        tasks = Task.objects.prefetch_related('equipment__location').all()
         location_form = LocationForm()
         equipment_form = EquipmentForm()
         task_form = TaskForm()
@@ -224,7 +234,7 @@ def save_location(request):
 @require_POST
 def create_equipment(request):
     # Backwards-compatible create endpoint; prefer save_equipment for AJAX upserts
-    form = EquipmentForm(request.POST)
+    form = EquipmentForm(request.POST, request.FILES)
     if form.is_valid():
         eq = form.save()
         return redirect('core:chores')
@@ -242,6 +252,7 @@ def equipment_detail_json(request, equipment_id):
         'count': eq.count if hasattr(eq, 'count') else None,
         'location': {'id': eq.location.id, 'name': eq.location.name} if eq.location else None,
         'notes': eq.notes or [],
+        'image_url': eq.image.url if eq.image else None,
     }
     return JsonResponse(data)
 
@@ -253,11 +264,22 @@ def save_equipment(request):
     eq_id = data.get('id')
     if eq_id:
         instance = get_object_or_404(Equipment, id=eq_id)
-        form = EquipmentForm(request.POST, instance=instance)
+        form = EquipmentForm(request.POST, request.FILES, instance=instance)
     else:
-        form = EquipmentForm(request.POST)
+        form = EquipmentForm(request.POST, request.FILES)
     if form.is_valid():
-        eq = form.save()
+        # handle optional remove-image checkbox
+        remove = request.POST.get('remove_image')
+        eq = form.save(commit=False)
+        if remove and eq.image:
+            try:
+                eq.image.delete(save=False)
+            except Exception:
+                pass
+            eq.image = None
+        eq.save()
+        # save m2m if any
+        form.save_m2m()
         is_ajax = (
             request.headers.get('x-requested-with') == 'XMLHttpRequest'
             or request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
@@ -340,6 +362,7 @@ def save_task(request):
                 'description': task.description or '',
                 'steps': task.steps or [],
                 'notes': task.notes or [],
+                'equipment': [{'id': e.id, 'name': e.name} for e in task.equipment.all()],
             }
             return JsonResponse({'success': True, 'task': data})
         return redirect('core:chores')

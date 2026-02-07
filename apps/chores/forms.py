@@ -159,13 +159,14 @@ class EquipmentForm(forms.ModelForm):
     class Meta:
         model = Equipment
         # include notes so client-side UI can persist structured notes JSON
-        fields = ['name', 'description', 'location', 'notes']
+        fields = ['name', 'description', 'location', 'notes', 'image']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'input input-bordered w-full'}),
             'description': forms.Textarea(attrs={'class': 'textarea textarea-bordered w-full', 'rows': 2}),
             'location': forms.Select(attrs={'class': 'select select-bordered w-full'}),
             # notes will be populated by client UI as JSON; keep it hidden
             'notes': forms.HiddenInput(),
+            'image': forms.ClearableFileInput(attrs={'class': 'file-input file-input-bordered w-full'}),
         }
 
     def clean_notes(self):

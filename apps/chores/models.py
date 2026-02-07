@@ -118,6 +118,9 @@ class Equipment(models.Model):
         help_text='Where the equipment is stored.',
     )
     notes = models.JSONField(blank=True, null=True, help_text='Optional structured metadata for the equipment.')
+    image = models.ImageField(
+        upload_to='chore/equipment/images/', null=True, blank=True, help_text='Optional photo of the equipment.'
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

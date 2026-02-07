@@ -405,3 +405,4 @@ $RECYCLE.BIN/
 **/.django_tailwind_cli
 .env.compose
 staticfiles/
+media/**
