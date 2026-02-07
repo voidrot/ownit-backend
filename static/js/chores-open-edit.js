@@ -172,15 +172,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const cardBody = document.createElement('div');
     cardBody.className = 'card-body flex items-center justify-between p-4';
     const left = document.createElement('div');
-    left.className = 'min-w-0';
-    const nameDiv = document.createElement('div');
-    nameDiv.className = 'font-medium truncate';
-    nameDiv.textContent = loc.name;
-    const descDiv = document.createElement('div');
-    descDiv.className = 'text-sm text-muted truncate';
-    descDiv.textContent = loc.description || '—';
-    left.appendChild(nameDiv);
-    left.appendChild(descDiv);
+    left.className = 'flex-1 min-w-0';
+    const nameHeading = document.createElement('h3');
+    nameHeading.className = 'text-base font-semibold truncate mb-1';
+    nameHeading.textContent = loc.name;
+    const descP = document.createElement('p');
+    descP.className = 'text-sm text-muted truncate';
+    descP.textContent = loc.description || '—';
+    left.appendChild(nameHeading);
+    left.appendChild(descP);
     cardBody.appendChild(left);
 
     const right = document.createElement('div');
@@ -236,11 +236,22 @@ document.addEventListener('DOMContentLoaded', function() {
     const h3b = document.createElement('h3');
     h3b.className = 'font-semibold';
     h3b.textContent = 'Notes';
-    const p2 = document.createElement('p');
-    p2.className = 'text-sm';
-    p2.textContent = (loc.notes && loc.notes.length) ? loc.notes.join(', ') : '—';
     d2.appendChild(h3b);
-    d2.appendChild(p2);
+    if (loc.notes && loc.notes.length) {
+      const ul = document.createElement('ul');
+      ul.className = 'list-disc list-inside text-sm';
+      loc.notes.forEach(n => {
+        const li = document.createElement('li');
+        li.textContent = n;
+        ul.appendChild(li);
+      });
+      d2.appendChild(ul);
+    } else {
+      const p2 = document.createElement('p');
+      p2.className = 'text-sm';
+      p2.textContent = '—';
+      d2.appendChild(p2);
+    }
     grid.appendChild(d1);
     grid.appendChild(d2);
     body2.appendChild(grid);

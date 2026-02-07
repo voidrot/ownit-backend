@@ -541,12 +541,12 @@
                                         <div class="collapse card bg-base-100 shadow-sm rounded-lg mb-3">
                                             <input id="collapse-location-{{ loc.id }}" type="checkbox" class="sr-only" />
                                             <label for="collapse-location-{{ loc.id }}" class="collapse-title p-0 cursor-pointer">
-                                                <div class="card-body flex items-center justify-between p-4">
-                                                    <div class="min-w-0">
-                                                        <div class="font-medium truncate">{{ loc.name }}</div>
-                                                        <div class="text-sm text-muted truncate">{% if loc.description %}{{ loc.description|truncatechars:80 }}{% else %}&mdash;{% endif %}</div>
+                                                <div class="flex items-center justify-between gap-4 p-4">
+                                                    <div class="flex-1 min-w-0">
+                                                        <h3 class="text-base font-semibold truncate mb-1">{{ loc.name }}</h3>
+                                                        <p class="text-sm text-muted truncate">{% if loc.description %}{{ loc.description|truncatechars:80 }}{% else %}&mdash;{% endif %}</p>
                                                     </div>
-                                                    <div class="flex items-center gap-2">
+                                                    <div class="flex items-center gap-2 flex-shrink-0 whitespace-nowrap">
                                                         <a href="#" class="btn btn-sm btn-ghost" onclick="openEditLocation({{ loc.id }}); return false;">Edit</a>
                                                         <form method="post" action="{% url 'core:delete_location' loc.id %}" class="inline" onsubmit="return confirm('Delete this location?');">
                                                             {% csrf_token %}
@@ -563,8 +563,16 @@
                                                             <p class="text-sm">{% if loc.description %}{{ loc.description }}{% else %}&mdash;{% endif %}</p>
                                                         </div>
                                                         <div>
-                                                            <h3 class="font-semibold">Notes</h3>
-                                                            <p class="text-sm">{% if loc.notes %}{{ loc.notes }}{% else %}&mdash;{% endif %}</p>
+                                                                                                                        <h3 class="font-semibold">Notes</h3>
+                                                                                                                        {% if loc.notes %}
+                                                                                                                            <ul class="list-disc list-inside text-sm">
+                                                                                                                                {% for note in loc.notes %}
+                                                                                                                                    <li>{{ note }}</li>
+                                                                                                                                {% endfor %}
+                                                                                                                            </ul>
+                                                                                                                        {% else %}
+                                                                                                                            <p class="text-sm">&mdash;</p>
+                                                                                                                        {% endif %}
                                                         </div>
                                                     </div>
                                                 </div>
