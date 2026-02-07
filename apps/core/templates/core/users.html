@@ -3,121 +3,29 @@
 {% block content %}
     <div class="container mx-auto px-4">
         <div class="flex flex-col md:flex-row md:items-start gap-6 md:gap-8 py-6">
-            <!-- Left: Create form (collapsible card, constrained width) -->
-            <section class="w-full md:w-1/3">
-                <div class="max-w-md mx-auto">
-                    <div class="collapse">
-                        <input type="checkbox" aria-hidden="true" />
-                        <div class="collapse-title text-lg font-medium btn btn-success">Create New User</div>
-                        <div class="collapse-content">
-                            <div class="card bg-base-200 shadow-lg">
-                                <div class="card-body">
-                                    <p class="text-sm text-muted">
-                                        Create a parent or child account. Emails are recorded and marked verified for portal access.
-                                    </p>
-                                    <form method="post" id="create-user-form" class="mt-4 space-y-4">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}" />
-                                        <div class="form-control">
-                                            <label class="label">
-                                                <span class="label-text">Username <span class="text-red-500">*</span></span>
-                                            </label>
-                                            {{ form.username }}
-                                            <span class="text-sm text-muted mt-1">Choose a unique username.</span>
-                                            {{ form.username.errors }}
-                                        </div>
-                                        <div class="flex gap-2">
-                                            <div class="form-control flex-1">
-                                                <label class="label">
-                                                    <span class="label-text">First name</span>
-                                                </label>
-                                                {{ form.first_name }}
-                                                {{ form.first_name.errors }}
-                                            </div>
-                                            <div class="form-control flex-1">
-                                                <label class="label">
-                                                    <span class="label-text">Last name</span>
-                                                </label>
-                                                {{ form.last_name }}
-                                                {{ form.last_name.errors }}
-                                            </div>
-                                        </div>
-                                        <div class="form-control">
-                                            <label class="label">
-                                                <span class="label-text">Email <span class="text-red-500">*</span></span>
-                                            </label>
-                                            {{ form.email }}
-                                            <span class="text-sm text-muted mt-1">We will mark this email as verified for portal access.</span>
-                                            {{ form.email.errors }}
-                                        </div>
-                                        <div class="form-control relative">
-                                            <label class="label">
-                                                <span class="label-text">Password <span class="text-red-500">*</span></span>
-                                            </label>
-                                            {{ form.password1 }}
-                                            <button type="button"
-                                                    id="toggle-password1"
-                                                    class="btn btn-ghost btn-sm absolute right-3 top-12"
-                                                    aria-label="Toggle password visibility">👁️</button>
-                                            <span class="text-sm text-muted">Minimum 8 characters recommended.</span>
-                                            <p class="text-sm text-error mt-1"
-                                               id="password1-error"
-                                               aria-live="polite"></p>
-                                            {{ form.password1.errors }}
-                                        </div>
-                                        <div class="form-control relative">
-                                            <label class="label">
-                                                <span class="label-text">Confirm Password <span class="text-red-500">*</span></span>
-                                            </label>
-                                            {{ form.password2 }}
-                                            <button type="button"
-                                                    id="toggle-password2"
-                                                    class="btn btn-ghost btn-sm absolute right-3 top-12"
-                                                    aria-label="Toggle confirm password visibility">👁️</button>
-                                            <p class="text-sm text-error mt-1"
-                                               id="password2-error"
-                                               aria-live="polite"></p>
-                                            {{ form.password2.errors }}
-                                        </div>
-                                        <div class="form-control">
-                                            <label class="label">
-                                                <span class="label-text">Role <span class="text-red-500">*</span></span>
-                                            </label>
-                                            {{ form.group }}
-                                            {{ form.group.errors }}
-                                        </div>
-                                        <div class="form-control mt-2">
-                                            <button id="create-user-btn"
-                                                    type="submit"
-                                                    class="btn btn-primary w-full"
-                                                    disabled>
-                                                <span id="create-btn-text">Create user</span>
-                                                <span id="create-btn-spinner" class="ml-2 hidden">⏳</span>
-                                            </button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
             <!-- Right: Users list -->
-            <section class="w-full md:w-2/3">
+			<section class="w-full md:w-3/4 mx-auto">
                 <div class="card bg-base-200 shadow-sm  mt-6">
                     <div class="card-body">
                         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                             <h2 class="text-lg font-medium">Existing Users</h2>
                             <span class="text-sm text-muted mt-1 sm:mt-0 sm:ml-3">{{ users|length }} users</span>
                         </div>
-                        <div class="overflow-x-auto mt-4">
-                            <table class="table table-zebra w-full">
+                        <div class="mt-4">
+                            <!-- Create button (opens modal) -->
+                            <div class="mb-4">
+                                <label for="modal-create-user" class="btn btn-success">Create New User</label>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto mt-2">
+							<table class="table table-zebra w-full mx-auto">
                                 <thead>
                                     <tr>
                                         <th>Username</th>
                                         <th>First name</th>
                                         <th>Last name</th>
                                         <th>Email</th>
+                                        <th>Birthdate</th>
                                         <th>Groups</th>
                                         <th class="text-right">Actions</th>
                                     </tr>
@@ -129,6 +37,7 @@
                                             <td class="align-middle">{{ user.first_name }}</td>
                                             <td class="align-middle">{{ user.last_name }}</td>
                                             <td class="align-middle">{{ user.email }}</td>
+                                            <td class="align-middle">{% if user.birth_date %}{{ user.birth_date|date:"Y-m-d" }}{% else %}<span class="text-sm text-muted">—</span>{% endif %}</td>
                                             <td class="align-middle">
                                                 {% for group in user.groups.all %}<span class="badge badge-outline mr-1">{{ group.name }}</span>{% endfor %}
                                             </td>
@@ -189,7 +98,7 @@
                                         </tr>
                                     {% empty %}
                                         <tr>
-                                            <td colspan="6" class="text-center py-8 text-muted">No users found</td>
+                                            <td colspan="7" class="text-center py-8 text-muted">No users found</td>
                                         </tr>
                                     {% endfor %}
                                 </tbody>
@@ -201,6 +110,94 @@
         </div>
     </div>
     <!-- Consolidated JS (validation, toggles, AJAX submit) -->
+		<!-- Create User Modal (moved from left column) -->
+		<input type="checkbox" id="modal-create-user" class="modal-toggle" />
+		<div class="modal">
+			<div class="modal-box max-w-lg text-left">
+				<h3 class="font-bold text-lg">Create New User</h3>
+				<p class="text-sm text-muted mt-2">Create a parent or child account. Emails are recorded and marked verified for portal access.</p>
+				<form method="post" id="create-user-form" class="mt-4 space-y-4">
+					{% csrf_token %}
+					<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}" />
+					<div class="form-control">
+						<label class="label">
+							<span class="label-text">Username <span class="text-red-500">*</span></span>
+						</label>
+						{{ form.username }}
+						<span class="text-sm text-muted mt-1">Choose a unique username.</span>
+						{{ form.username.errors }}
+					</div>
+					<div class="flex gap-2">
+						<div class="form-control flex-1">
+							<label class="label">
+								<span class="label-text">First name</span>
+							</label>
+							{{ form.first_name }}
+							{{ form.first_name.errors }}
+						</div>
+						<div class="form-control flex-1">
+							<label class="label">
+								<span class="label-text">Last name</span>
+							</label>
+							{{ form.last_name }}
+							{{ form.last_name.errors }}
+						</div>
+					</div>
+					<div class="form-control">
+						<label class="label">
+							<span class="label-text">Email <span class="text-red-500">*</span></span>
+						</label>
+						{{ form.email }}
+						<span class="text-sm text-muted mt-1">We will mark this email as verified for portal access.</span>
+						{{ form.email.errors }}
+					</div>
+					<div class="form-control">
+						<label class="label">
+							<span class="label-text">Birthdate (optional)</span>
+						</label>
+						{{ form.birth_date }}
+						<span class="text-sm text-muted mt-1">Optional: used for age-restricted chore assignment.</span>
+						{{ form.birth_date.errors }}
+					</div>
+					<div class="form-control relative">
+						<label class="label">
+							<span class="label-text">Password <span class="text-red-500">*</span></span>
+						</label>
+						{{ form.password1 }}
+						<button type="button" id="toggle-password1" class="btn btn-ghost btn-sm absolute right-3 top-12" aria-label="Toggle password visibility">👁️</button>
+						<span class="text-sm text-muted">Minimum 8 characters recommended.</span>
+						<p class="text-sm text-error mt-1" id="password1-error" aria-live="polite"></p>
+						{{ form.password1.errors }}
+					</div>
+					<div class="form-control relative">
+						<label class="label">
+							<span class="label-text">Confirm Password <span class="text-red-500">*</span></span>
+						</label>
+						{{ form.password2 }}
+						<button type="button" id="toggle-password2" class="btn btn-ghost btn-sm absolute right-3 top-12" aria-label="Toggle confirm password visibility">👁️</button>
+						<p class="text-sm text-error mt-1" id="password2-error" aria-live="polite"></p>
+						{{ form.password2.errors }}
+					</div>
+					<div class="form-control">
+						<label class="label">
+							<span class="label-text">Role <span class="text-red-500">*</span></span>
+						</label>
+						{{ form.group }}
+						{{ form.group.errors }}
+					</div>
+					<div class="form-control mt-2">
+						<button id="create-user-btn" type="submit" class="btn btn-primary w-full" disabled>
+							<span id="create-btn-text">Create user</span>
+							<span id="create-btn-spinner" class="ml-2 hidden">⏳</span>
+						</button>
+					</div>
+				</form>
+				<div class="modal-action">
+					<label for="modal-create-user" class="btn">Cancel</label>
+					<!-- The actual submit is inside the form above -->
+				</div>
+			</div>
+		</div>
     <script>
 document.addEventListener('DOMContentLoaded', function() {
 		// Element references (prefer name selectors as Django forms may wrap inputs)

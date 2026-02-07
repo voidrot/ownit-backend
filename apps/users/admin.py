@@ -10,7 +10,7 @@ User = get_user_model()
 class UserAdmin(auth_admin.UserAdmin):
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
-        (_('Personal info'), {'fields': ('first_name', 'last_name', 'email')}),
+        (_('Personal info'), {'fields': ('first_name', 'last_name', 'email', 'birth_date')}),
         (
             _('Permissions'),
             {
@@ -25,5 +25,6 @@ class UserAdmin(auth_admin.UserAdmin):
         ),
         (_('Important dates'), {'fields': ('last_login', 'date_joined')}),
     )
-    list_display = ('username', 'email', 'is_superuser')  # type: ignore
+    list_display = ('username', 'email', 'birth_date', 'is_superuser')  # type: ignore
+    list_editable = ('birth_date',)
     search_fields = ('username', 'email')  # type: ignore[assignment]

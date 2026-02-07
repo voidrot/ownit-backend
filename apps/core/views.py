@@ -23,10 +23,16 @@ class UserCreateForm(UserCreationForm):
     group = forms.ModelChoiceField(
         queryset=Group.objects.filter(name__in=['child', 'parent']), required=True, label='Role'
     )
+    birth_date = forms.DateField(
+        required=False,
+        label='Birthdate',
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'input input-bordered w-full'}),
+        help_text='Optional birth date of the user.'
+    )
 
     class Meta:
         model = User
-        fields = ('username', 'first_name', 'last_name', 'email', 'password1', 'password2', 'group')
+        fields = ('username', 'first_name', 'last_name', 'email', 'birth_date', 'password1', 'password2', 'group')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -44,6 +50,10 @@ class UserCreateForm(UserCreationForm):
             if name in self.fields:
                 existing = self.fields[name].widget.attrs
                 existing.update(attrs)
+
+        # Ensure birth_date widget attrs are present if field exists
+        if 'birth_date' in self.fields:
+            self.fields['birth_date'].widget.attrs.update({'class': 'input input-bordered w-full'})
 
 
 # Create your views here.
@@ -427,6 +437,16 @@ def users_view(request):
                     obj.save()
             except Exception:
                 # Don't block user creation on EmailAddress issues
+                pass
+
+            # Persist optional birth_date if provided by the form
+            try:
+                birth_date = form.cleaned_data.get('birth_date')
+                if birth_date:
+                    user.birth_date = birth_date
+                    user.save()
+            except Exception:
+                # Non-fatal: ignore errors saving birth_date
                 pass
 
             messages.success(request, 'User created successfully.')
