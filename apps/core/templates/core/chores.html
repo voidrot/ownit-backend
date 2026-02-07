@@ -114,18 +114,46 @@
                                         </div>
                                     </div>
                                     <div>
-                                        {{ chore_form.equipment.label_tag }}
-                                        {{ chore_form.equipment }}
+                                        <label class="block">Equipment</label>
+                                        <div class="relative mb-2">
+                                            <input id="chore-equipment-filter" type="search" placeholder="Filter equipment" class="input input-sm input-bordered w-full pr-12" aria-label="Filter equipment" />
+                                            <button type="button" id="chore-equipment-clear" class="absolute right-2 top-1/2 -translate-y-1/2 btn btn-ghost btn-xs h-7 w-7 p-0 rounded-full flex items-center justify-center" aria-label="Clear equipment filter">✕</button>
+                                        </div>
+                                        <div id="chore-equipment-options" class="border rounded p-2 h-32 overflow-y-auto">
+                                            {% with selected=chore_form.equipment.value %}
+                                                {% for eq in equipment %}
+                                                    <label class="flex items-center gap-2 py-1">
+                                                        <input type="checkbox" name="equipment" value="{{ eq.id }}" class="chore-equipment-checkbox" {% if selected and eq.id|stringformat:"s" in selected %}checked{% else %}{% if chore_form.instance and eq in chore_form.instance.equipment.all %}checked{% endif %}{% endif %} />
+                                                        <span class="text-sm">{{ eq.name }}</span>
+                                                    </label>
+                                                {% endfor %}
+                                            {% endwith %}
+                                        </div>
                                         {% if chore_form.equipment.errors %}
                                             <p class="text-error text-sm mt-1">{{ chore_form.equipment.errors|join:' ' }}</p>
                                         {% endif %}
+                                        <p class="text-sm text-muted mt-1">Select one or more equipment items (up to scrollable list shown).</p>
                                     </div>
                                     <div>
-                                        {{ chore_form.tasks.label_tag }}
-                                        {{ chore_form.tasks }}
+                                        <label class="block">Tasks</label>
+                                        <div class="relative mb-2">
+                                            <input id="chore-tasks-filter" type="search" placeholder="Filter tasks" class="input input-sm input-bordered w-full pr-12" aria-label="Filter tasks" />
+                                            <button type="button" id="chore-tasks-clear" class="absolute right-2 top-1/2 -translate-y-1/2 btn btn-ghost btn-xs h-7 w-7 p-0 rounded-full flex items-center justify-center" aria-label="Clear tasks filter">✕</button>
+                                        </div>
+                                        <div id="chore-tasks-options" class="border rounded p-2 h-32 overflow-y-auto">
+                                            {% with selected=chore_form.tasks.value %}
+                                                {% for t in tasks %}
+                                                    <label class="flex items-center gap-2 py-1">
+                                                        <input type="checkbox" name="tasks" value="{{ t.id }}" class="chore-tasks-checkbox" {% if selected and t.id|stringformat:"s" in selected %}checked{% else %}{% if chore_form.instance and t in chore_form.instance.tasks.all %}checked{% endif %}{% endif %} />
+                                                        <span class="text-sm">{{ t.name }}</span>
+                                                    </label>
+                                                {% endfor %}
+                                            {% endwith %}
+                                        </div>
                                         {% if chore_form.tasks.errors %}
                                             <p class="text-error text-sm mt-1">{{ chore_form.tasks.errors|join:' ' }}</p>
                                         {% endif %}
+                                        <p class="text-sm text-muted mt-1">Select tasks to attach to this chore.</p>
                                     </div>
                                     <div class="flex items-center gap-4">
                                         <div>
@@ -144,19 +172,46 @@
                                         </div>
                                     </div>
                                     <div class="mt-2">
-                                        <label class="block">Instructions video (upload or external)</label>
-                                        {{ chore_form.instructions_video }}
-                                        {% if chore_form.instructions_video.errors %}
-                                            <p class="text-error text-sm mt-1">{{ chore_form.instructions_video.errors|join:' ' }}</p>
-                                        {% endif %}
-                                        {{ chore_form.instructions_video_name }}
-                                        {% if chore_form.instructions_video_name.errors %}
-                                            <p class="text-error text-sm mt-1">{{ chore_form.instructions_video_name.errors|join:' ' }}</p>
-                                        {% endif %}
-                                        {{ chore_form.instructions_video_source }}
-                                        {% if chore_form.instructions_video_source.errors %}
-                                            <p class="text-error text-sm mt-1">{{ chore_form.instructions_video_source.errors|join:' ' }}</p>
-                                        {% endif %}
+                                        <div class="collapse">
+                                            <input id="collapse-instructions-video-toggle" type="checkbox" class="sr-only" />
+                                            <label for="collapse-instructions-video-toggle" class="collapse-title p-0">
+                                                <div class="flex items-center justify-between">
+                                                    <span class="font-semibold">Instructional video (optional)</span>
+                                                    <span class="text-sm text-muted">Click to expand</span>
+                                                </div>
+                                            </label>
+                                            <div class="collapse-content p-0 overflow-visible">
+                                                <div class="space-y-2 p-3 border rounded overflow-visible">
+                                                    <div>
+                                                        <label class="block font-semibold">Upload video file
+                                                            <button type="button" class="btn btn-ghost btn-xs p-0 ml-2" title="Choose a video file to upload. If you prefer to use an external video link, leave this field blank." aria-label="Help: upload video">?</button>
+                                                        </label>
+                                                        {{ chore_form.instructions_video }}
+                                                        {% if chore_form.instructions_video.errors %}
+                                                            <p class="text-error text-sm mt-1">{{ chore_form.instructions_video.errors|join:' ' }}</p>
+                                                        {% endif %}
+                                                    </div>
+                                                    <div>
+                                                        <label class="block">File display name (optional)
+                                                            <button type="button" class="btn btn-ghost btn-xs p-0 ml-2" title="A human-friendly name to show in the UI for this uploaded file." aria-label="Help: file display name">?</button>
+                                                        </label>
+                                                        {{ chore_form.instructions_video_name }}
+                                                        {% if chore_form.instructions_video_name.errors %}
+                                                            <p class="text-error text-sm mt-1">{{ chore_form.instructions_video_name.errors|join:' ' }}</p>
+                                                        {% endif %}
+                                                    </div>
+                                                    <div>
+                                                        <label class="block font-semibold">Or: External video URL
+                                                            <button type="button" class="btn btn-ghost btn-xs p-0 ml-2" title="Paste a public video URL (YouTube, Vimeo, etc.). If uploading a file above, leave this blank." aria-label="Help: external video URL">?</button>
+                                                        </label>
+                                                        {{ chore_form.instructions_video_source }}
+                                                        {% if chore_form.instructions_video_source.errors %}
+                                                            <p class="text-error text-sm mt-1">{{ chore_form.instructions_video_source.errors|join:' ' }}</p>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                     {% if chore_form.instance and chore_form.instance.pk %}
                                         <input type="hidden" name="id" value="{{ chore_form.instance.pk }}" />
@@ -273,7 +328,20 @@
                                     </div>
                                     <div>
                                         <label class="block">Equipment</label>
-                                        {{ task_form.equipment }}
+                                        <div class="relative mb-2">
+                                            <input id="task-equipment-filter" type="search" placeholder="Filter equipment" class="input input-sm input-bordered w-full pr-12" aria-label="Filter equipment for task" />
+                                            <button type="button" id="task-equipment-clear" class="absolute right-2 top-1/2 -translate-y-1/2 btn btn-ghost btn-xs h-7 w-7 p-0 rounded-full flex items-center justify-center" aria-label="Clear equipment filter for task">✕</button>
+                                        </div>
+                                        <div id="task-equipment-options" class="border rounded p-2 h-32 overflow-y-auto">
+                                            {% with selected=task_form.equipment.value %}
+                                                {% for eq in equipment %}
+                                                    <label class="flex items-center gap-2 py-1">
+                                                        <input type="checkbox" name="equipment" value="{{ eq.id }}" class="task-equipment-checkbox" {% if selected and eq.id|stringformat:"s" in selected %}checked{% else %}{% if task_form.instance and eq in task_form.instance.equipment.all %}checked{% endif %}{% endif %} />
+                                                        <span class="text-sm">{{ eq.name }}</span>
+                                                    </label>
+                                                {% endfor %}
+                                            {% endwith %}
+                                        </div>
                                         {% if task_form.equipment.errors %}
                                             <p class="text-error text-sm mt-1">{{ task_form.equipment.errors|join:' ' }}</p>
                                         {% endif %}
@@ -503,4 +571,5 @@
     <script src="{% static 'js/chores-tabs.js' %}"></script>
     <script src="{% static 'js/notes-ui.js' %}"></script>
     <script src="{% static 'js/steps-ui.js' %}"></script>
+    <script src="{% static 'js/multi-select-filter.js' %}"></script>
 {% endblock %}
