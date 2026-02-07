@@ -3,10 +3,16 @@ document.addEventListener('DOMContentLoaded', function () {
   const panels = Array.from(document.querySelectorAll('.quick-add-panel'));
   if (!tabs.length || !panels.length) return;
 
+  // Activate by tab element
   function activate(tab) {
     const target = tab.getAttribute('data-tab');
+    activateByName(target);
+  }
+
+  // Activate by panel name (shared helper)
+  function activateByName(target) {
     tabs.forEach(t => {
-      const selected = t === tab;
+      const selected = t.getAttribute('data-tab') === target;
       t.classList.toggle('tab-active', selected);
       t.setAttribute('aria-selected', String(selected));
     });
@@ -15,6 +21,9 @@ document.addEventListener('DOMContentLoaded', function () {
       else p.classList.add('hidden');
     });
   }
+
+  // expose a global helper so other scripts can activate tabs without duplicating logic
+  window.activateQuickAddTab = activateByName;
 
   tabs.forEach(t => t.addEventListener('click', () => activate(t)));
 

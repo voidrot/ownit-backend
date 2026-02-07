@@ -8,6 +8,7 @@ from allauth.account.adapter import get_adapter
 from allauth.account.utils import setup_user_email
 from allauth.account.models import EmailAddress
 from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_GET
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
@@ -66,7 +67,16 @@ def chores_view(request):
         chore_form = ChoreForm(instance=edit_instance)
     else:
         chore_form = ChoreForm()
-    location_form = LocationForm()
+    # If ?edit_location=<id> is present, load that location into the location form for editing
+    edit_loc_id = request.GET.get('edit_location')
+    if edit_loc_id:
+        try:
+            edit_loc = get_object_or_404(Location, id=edit_loc_id)
+            location_form = LocationForm(instance=edit_loc)
+        except Exception:
+            location_form = LocationForm()
+    else:
+        location_form = LocationForm()
     equipment_form = EquipmentForm()
     task_form = TaskForm()
     return render(
@@ -136,6 +146,30 @@ def delete_chore(request, chore_id):
 
 
 @login_required
+@require_GET
+def location_detail_json(request, location_id):
+    """Return JSON representation of a Location for client-side editing."""
+    loc = get_object_or_404(Location, id=location_id)
+    data = {
+        'id': loc.id,
+        'name': loc.name,
+        'description': loc.description or '',
+        'notes': loc.notes or [],
+    }
+    return JsonResponse(data)
+
+
+@login_required
+@require_POST
+def delete_location(request, location_id):
+    """Delete a location."""
+    loc = get_object_or_404(Location, id=location_id)
+    loc.delete()
+    messages.success(request, 'Location deleted.')
+    return redirect('core:chores')
+
+
+@login_required
 @require_POST
 def create_location(request):
     form = LocationForm(request.POST)
@@ -143,6 +177,37 @@ def create_location(request):
         loc = form.save()
         return redirect('core:chores')
     # Return structured form errors to help debugging in client
+    try:
+        errors = form.errors.get_json_data()
+    except Exception:
+        errors = {k: form.errors.get(k) for k in form.errors}
+    return JsonResponse({'errors': errors}, status=400)
+
+
+@login_required
+@require_POST
+def save_location(request):
+    """Create or update a location. If 'id' is present in POST, update the instance."""
+    data = request.POST.dict()
+    loc_id = data.get('id')
+    if loc_id:
+        instance = get_object_or_404(Location, id=loc_id)
+        form = LocationForm(request.POST, instance=instance)
+    else:
+        form = LocationForm(request.POST)
+    if form.is_valid():
+        loc = form.save()
+        # If this was an AJAX request, return JSON so the client can update the DOM
+        is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
+        if is_ajax:
+            data = {
+                'id': loc.id,
+                'name': loc.name,
+                'description': loc.description or '',
+                'notes': loc.notes or [],
+            }
+            return JsonResponse({'success': True, 'location': data})
+        return redirect('core:chores')
     try:
         errors = form.errors.get_json_data()
     except Exception:

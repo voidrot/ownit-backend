@@ -6,6 +6,9 @@ document.addEventListener('DOMContentLoaded', function () {
       .map(el => el.getAttribute('data-panel'))
       .filter(Boolean);
 
+    // container for external control of panels (e.g., programmatic setNotes)
+    window._notesPanels = window._notesPanels || {};
+
     panels.forEach(function (panelName) {
       const panel = document.querySelector('.quick-add-panel[data-panel="' + panelName + '"]');
       if (!panel) return;
@@ -82,6 +85,23 @@ document.addEventListener('DOMContentLoaded', function () {
         }
       }
       renderNotes();
+
+      // expose control hooks for programmatic updates
+      window._notesPanels[panelName] = {
+        setNotes: function (arr) {
+          notes = Array.isArray(arr) ? arr.map(String).filter(s => s.trim()) : [];
+          updateHidden();
+          renderNotes();
+        },
+        getNotes: function () {
+          return notes.slice();
+        },
+        clear: function () {
+          notes = [];
+          updateHidden();
+          renderNotes();
+        }
+      };
     });
   } catch (err) {
     console.error('Notes UI error', err);

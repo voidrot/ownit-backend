@@ -231,7 +231,7 @@
                                 </form>
                             </div>
                             <div class="quick-add-panel hidden" data-panel="location">
-                                <form method="post" action="{% url 'core:create_location' %}" class="space-y-2">
+                                <form id="location-form" method="post" action="{% url 'core:save_location' %}" class="space-y-2">
                                     {% csrf_token %}
                                     <div>
                                         <label class="block">Location name</label>
@@ -261,8 +261,11 @@
                                             <p class="text-error text-sm mt-1">{{ location_form.notes.errors|join:' ' }}</p>
                                         {% endif %}
                                     </div>
+                                    {% if location_form.instance and location_form.instance.pk %}
+                                        <input type="hidden" name="id" value="{{ location_form.instance.pk }}" />
+                                    {% endif %}
                                     <div class="mt-2">
-                                        <button class="btn btn-sm btn-outline" type="submit">Add Location</button>
+                                        <button class="btn btn-sm btn-primary" type="submit">Add Location</button>
                                     </div>
                                 </form>
                             </div>
@@ -532,31 +535,45 @@
                             </div>
                         </label>
                         <div class="collapse-content p-0">
-                            <div class="overflow-x-auto p-4">
-                                <table class="table table-zebra w-full">
-                                    <thead>
-                                        <tr>
-                                            <th>Name</th>
-                                            <th class="text-right">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% if locations %}
-                                            {% for loc in locations %}
-                                                <tr>
-                                                    <td>{{ loc.name }}</td>
-                                                    <td class="text-right">
-                                                        <a href="#" class="btn btn-sm btn-ghost" onclick="return false">Edit</a>
-                                                    </td>
-                                                </tr>
-                                            {% endfor %}
-                                        {% else %}
-                                            <tr>
-                                                <td colspan="2" class="text-center py-8 text-muted">No locations found</td>
-                                            </tr>
-                                        {% endif %}
-                                    </tbody>
-                                </table>
+                            <div class="p-4 space-y-2">
+                                {% if locations %}
+                                    {% for loc in locations %}
+                                        <div class="collapse card bg-base-100 shadow-sm rounded-lg mb-3">
+                                            <input id="collapse-location-{{ loc.id }}" type="checkbox" class="sr-only" />
+                                            <label for="collapse-location-{{ loc.id }}" class="collapse-title p-0 cursor-pointer">
+                                                <div class="card-body flex items-center justify-between p-4">
+                                                    <div class="min-w-0">
+                                                        <div class="font-medium truncate">{{ loc.name }}</div>
+                                                        <div class="text-sm text-muted truncate">{% if loc.description %}{{ loc.description|truncatechars:80 }}{% else %}&mdash;{% endif %}</div>
+                                                    </div>
+                                                    <div class="flex items-center gap-2">
+                                                        <a href="#" class="btn btn-sm btn-ghost" onclick="openEditLocation({{ loc.id }}); return false;">Edit</a>
+                                                        <form method="post" action="{% url 'core:delete_location' loc.id %}" class="inline" onsubmit="return confirm('Delete this location?');">
+                                                            {% csrf_token %}
+                                                            <button type="submit" class="btn btn-sm btn-error">Delete</button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </label>
+                                            <div class="collapse-content p-0">
+                                                <div class="card-body">
+                                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                        <div>
+                                                            <h3 class="font-semibold">Description</h3>
+                                                            <p class="text-sm">{% if loc.description %}{{ loc.description }}{% else %}&mdash;{% endif %}</p>
+                                                        </div>
+                                                        <div>
+                                                            <h3 class="font-semibold">Notes</h3>
+                                                            <p class="text-sm">{% if loc.notes %}{{ loc.notes }}{% else %}&mdash;{% endif %}</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="text-center py-8 text-muted">No locations found</div>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
