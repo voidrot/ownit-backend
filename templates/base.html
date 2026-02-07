@@ -7,7 +7,9 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>
-            {% block title %}OwnIt Admin{% endblock title %}
+            {% block title %}
+                OwnIt Admin
+            {% endblock title %}
         </title>
         <!-- Tailwind CSS -->
         {% tailwind_css %}
@@ -15,7 +17,8 @@
         {% django_htmx_script %}
         {% block extra_head %}{% endblock %}
     </head>
-    <body class="min-h-screen flex flex-col bg-base-100 text-base-content" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+    <body class="min-h-screen flex flex-col bg-base-100 text-base-content"
+          hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
         <!-- Global Messages/Toasts -->
         {% if messages %}
             <div class="toast toast-top toast-end z-50">
@@ -26,52 +29,74 @@
                 {% endfor %}
             </div>
         {% endif %}
-
         <!-- Navbar -->
         <header class="w-full bg-base-100 shadow-md">
             <div class="container max-w-7xl mx-auto px-4">
                 <div class="navbar">
                     <div class="navbar-start">
-                        <a href="{% url 'pages:landing' %}" class="btn btn-ghost normal-case text-2xl font-semibold">OwnIt Portal</a>
+                        <a href="{% url 'pages:landing' %}"
+                           class="btn btn-ghost normal-case text-2xl font-semibold">OwnIt Portal</a>
                     </div>
-
                     <div class="navbar-center md:flex">
                         <ul class="menu menu-horizontal px-1">
-                            <li><a href="{% url 'core:chores' %}">Chores</a></li>
-                            <li><a href="{% url 'core:behavior' %}">Behavior</a></li>
-                            <li><a href="{% url 'core:users' %}">Users</a></li>
-                            <li><a href="{% url 'core:settings' %}">Settings</a></li>
+                            <li>
+                                <a href="{% url 'core:chores' %}">Chores</a>
+                            </li>
+                            <li>
+                                <a href="{% url 'core:behavior' %}">Behavior</a>
+                            </li>
+                            <li>
+                                <a href="{% url 'core:users' %}">Users</a>
+                            </li>
+                            <li>
+                                <a href="{% url 'core:settings' %}">Settings</a>
+                            </li>
                         </ul>
                     </div>
-
                     <div class="navbar-end gap-2">
                         <!-- Theme selector (always visible) -->
                         <div class="flex items-center">
                             <label for="theme-selector" class="sr-only">Theme</label>
-                            <select id="theme-selector" aria-label="Theme selector" class="select select-sm select-ghost">
+                            <select id="theme-selector"
+                                    aria-label="Theme selector"
+                                    class="select select-sm select-ghost">
                                 <option value="auto">Auto</option>
                                 <option value="light">Light</option>
                                 <option value="dark">Dark</option>
                             </select>
                         </div>
-
                         <!-- Mobile dropdown for nav -->
                         <div class="lg:hidden">
                             <div class="dropdown dropdown-end">
                                 <label tabindex="0" class="btn btn-ghost btn-circle">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                         class="h-5 w-5"
+                                         fill="none"
+                                         viewBox="0 0 24 24"
+                                         stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                                     </svg>
                                 </label>
-                                <ul tabindex="0" class="menu menu-compact dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-52">
-                                    <li><a href="{% url 'core:chores' %}">Chores</a></li>
-                                    <li><a href="{% url 'core:behavior' %}">Behavior</a></li>
-                                    <li><a href="{% url 'core:users' %}">Users</a></li>
-                                    <li><a href="{% url 'core:settings' %}">Settings</a></li>
+                                <ul tabindex="0"
+                                    class="menu menu-compact dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-52">
+                                    <li>
+                                        <a href="{% url 'core:chores' %}">Chores</a>
+                                    </li>
+                                    <li>
+                                        <a href="{% url 'core:behavior' %}">Behavior</a>
+                                    </li>
+                                    <li>
+                                        <a href="{% url 'core:users' %}">Users</a>
+                                    </li>
+                                    <li>
+                                        <a href="{% url 'core:settings' %}">Settings</a>
+                                    </li>
                                     <li class="md:hidden">
                                         <label for="theme-selector-mobile" class="flex items-center gap-2 px-2">
                                             Theme
-                                            <select id="theme-selector-mobile" aria-label="Theme selector mobile" class="select select-sm select-ghost">
+                                            <select id="theme-selector-mobile"
+                                                    aria-label="Theme selector mobile"
+                                                    class="select select-sm select-ghost">
                                                 <option value="auto">Auto</option>
                                                 <option value="light">Light</option>
                                                 <option value="dark">Dark</option>
@@ -81,20 +106,24 @@
                                 </ul>
                             </div>
                         </div>
-
                         <!-- Auth links / avatar -->
                         {% if user.is_authenticated %}
-                        <div class="dropdown dropdown-end">
-                            <label tabindex="0" class="btn btn-ghost btn-circle avatar">
-                                <div class="w-8 rounded-full bg-base-200 flex items-center justify-center">
-                                    <span class="text-sm">{{ user.first_name|default:user.username|slice:":1"|upper }}</span>
-                                </div>
-                            </label>
-                            <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
-                                <li><a href="{% url 'account_change_password' %}">Change Password</a></li>
-                                <li><a href="{% url 'account_logout' %}">Logout</a></li>
-                            </ul>
-                        </div>
+                            <div class="dropdown dropdown-end">
+                                <label tabindex="0" class="btn btn-ghost btn-circle avatar">
+                                    <div class="w-8 rounded-full bg-base-200 flex items-center justify-center">
+                                        <span class="text-sm">{{ user.first_name|default:user.username|slice:":1"|upper }}</span>
+                                    </div>
+                                </label>
+                                <ul tabindex="0"
+                                    class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
+                                    <li>
+                                        <a href="{% url 'account_change_password' %}">Change Password</a>
+                                    </li>
+                                    <li>
+                                        <a href="{% url 'account_logout' %}">Logout</a>
+                                    </li>
+                                </ul>
+                            </div>
                         {% else %}
                             <a class="btn btn-ghost" href="{% url 'account_login' %}">Login</a>
                             <a class="btn btn-primary" href="{% url 'account_signup' %}">Sign Up</a>
@@ -103,21 +132,17 @@
                 </div>
             </div>
         </header>
-
         <!-- Main Content -->
         <main class="flex-grow container mx-auto px-4 py-8">
             {% block content %}{% endblock %}
         </main>
-
         <!-- Footer -->
         <footer class="footer footer-center p-6 bg-base-300 text-base-content">
             <aside>
                 <p>Copyright © {% now "Y" %} - OwnIt</p>
             </aside>
         </footer>
-
         {% block extra_script %}{% endblock %}
-
         <script>
             (function() {
                 // Shared theme logic for desktop and mobile selectors

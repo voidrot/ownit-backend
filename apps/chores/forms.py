@@ -18,14 +18,13 @@ WEEKDAY_CHOICES = [
 class ChoreForm(forms.ModelForm):
     # provide a select for weekday recurrence instead of free text
     recurrence_day_of_week = forms.ChoiceField(
-        choices=WEEKDAY_CHOICES,
-        required=False,
-        widget=forms.Select(attrs={'class': 'select select-bordered w-full'})
+        choices=WEEKDAY_CHOICES, required=False, widget=forms.Select(attrs={'class': 'select select-bordered w-full'})
     )
     recurrence_day_of_month = forms.CharField(
         required=False,
-        widget=forms.TextInput(attrs={'class': 'input input-bordered w-full', 'placeholder': 'e.g. 5 or 5,15'})
+        widget=forms.TextInput(attrs={'class': 'input input-bordered w-full', 'placeholder': 'e.g. 5 or 5,15'}),
     )
+
     class Meta:
         model = Chore
         fields = [

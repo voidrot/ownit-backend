@@ -18,11 +18,10 @@ from apps.chores.forms import ChoreForm, LocationForm, EquipmentForm, TaskForm
 from django.http import HttpResponseBadRequest
 from django.http import JsonResponse
 
+
 class UserCreateForm(UserCreationForm):
     group = forms.ModelChoiceField(
-        queryset=Group.objects.filter(name__in=['child', 'parent']),
-        required=True,
-        label="Role"
+        queryset=Group.objects.filter(name__in=['child', 'parent']), required=True, label='Role'
     )
 
     class Meta:
@@ -46,11 +45,13 @@ class UserCreateForm(UserCreationForm):
                 existing = self.fields[name].widget.attrs
                 existing.update(attrs)
 
+
 # Create your views here.
 @login_required
 def settings_view(request):
     """View for user settings page."""
     return render(request, 'core/settings.html')
+
 
 @login_required
 def chores_view(request):
@@ -199,7 +200,10 @@ def save_location(request):
     if form.is_valid():
         loc = form.save()
         # If this was an AJAX request, return JSON so the client can update the DOM
-        is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
+        is_ajax = (
+            request.headers.get('x-requested-with') == 'XMLHttpRequest'
+            or request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
+        )
         if is_ajax:
             data = {
                 'id': loc.id,
@@ -254,7 +258,10 @@ def save_equipment(request):
         form = EquipmentForm(request.POST)
     if form.is_valid():
         eq = form.save()
-        is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
+        is_ajax = (
+            request.headers.get('x-requested-with') == 'XMLHttpRequest'
+            or request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
+        )
         if is_ajax:
             data = {
                 'id': eq.id,
@@ -302,7 +309,7 @@ def task_detail_json(request, task_id):
         'description': t.description or '',
         'steps': t.steps or [],
         'notes': t.notes or [],
-        'equipment': [ {'id': e.id, 'name': e.name} for e in t.equipment.all() ],
+        'equipment': [{'id': e.id, 'name': e.name} for e in t.equipment.all()],
     }
     return JsonResponse(data)
 
@@ -322,7 +329,10 @@ def save_task(request):
         # if equipment checkboxes present, set m2m
         if 'equipment' in request.POST:
             task.equipment.set(request.POST.getlist('equipment'))
-        is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
+        is_ajax = (
+            request.headers.get('x-requested-with') == 'XMLHttpRequest'
+            or request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
+        )
         if is_ajax:
             data = {
                 'id': task.id,
@@ -348,10 +358,12 @@ def delete_task(request, task_id):
     messages.success(request, 'Task deleted.')
     return redirect('core:chores')
 
+
 @login_required
 def behavior_view(request):
     """View for behavior management page."""
     return render(request, 'core/behavior.html')
+
 
 @login_required
 def users_view(request):
@@ -402,6 +414,7 @@ def users_view(request):
     users = User.objects.prefetch_related('groups').exclude(is_superuser=True)
     return render(request, 'core/users.html', {'users': users, 'form': form})
 
+
 @login_required
 @require_POST
 def delete_user(request, user_id):
@@ -441,5 +454,5 @@ def change_password(request, user_id):
 
     target.set_password(pw1)
     target.save()
-    messages.success(request, f"Password for {target.username} updated.")
+    messages.success(request, f'Password for {target.username} updated.')
     return JsonResponse({'ok': True})

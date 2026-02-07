@@ -116,14 +116,27 @@
                                     <div>
                                         <label class="block">Equipment</label>
                                         <div class="relative mb-2">
-                                            <input id="chore-equipment-filter" type="search" placeholder="Filter equipment" class="input input-sm input-bordered w-full pr-12" aria-label="Filter equipment" />
-                                            <button type="button" id="chore-equipment-clear" class="absolute right-2 top-1/2 -translate-y-1/2 btn btn-ghost btn-xs h-7 w-7 p-0 rounded-full flex items-center justify-center" aria-label="Clear equipment filter">✕</button>
+                                            <input id="chore-equipment-filter"
+                                                   type="search"
+                                                   placeholder="Filter equipment"
+                                                   class="input input-sm input-bordered w-full pr-12"
+                                                   aria-label="Filter equipment" />
+                                            <button type="button"
+                                                    id="chore-equipment-clear"
+                                                    class="absolute right-2 top-1/2 -translate-y-1/2 btn btn-ghost btn-xs h-7 w-7 p-0 rounded-full flex items-center justify-center"
+                                                    aria-label="Clear equipment filter">✕</button>
                                         </div>
-                                        <div id="chore-equipment-options" class="border rounded p-2 h-32 overflow-y-auto">
+                                        <div id="chore-equipment-options"
+                                             class="border rounded p-2 h-32 overflow-y-auto">
                                             {% with selected=chore_form.equipment.value %}
                                                 {% for eq in equipment %}
                                                     <label class="flex items-center gap-2 py-1">
-                                                        <input type="checkbox" name="equipment" value="{{ eq.id }}" class="chore-equipment-checkbox" {% if selected and eq.id|stringformat:"s" in selected %}checked{% else %}{% if chore_form.instance and eq in chore_form.instance.equipment.all %}checked{% endif %}{% endif %} />
+                                                        <input type="checkbox"
+                                                               name="equipment"
+                                                               value="{{ eq.id }}"
+                                                               class="chore-equipment-checkbox"
+                                                               {% if selected and eq.id|stringformat:"s" in selected %}checked{% else %}{% if chore_form.instance and eq in chore_form.instance.equipment.all %}checked{% endif %}
+                                                               {% endif %} />
                                                         <span class="text-sm">{{ eq.name }}</span>
                                                     </label>
                                                 {% endfor %}
@@ -137,14 +150,27 @@
                                     <div>
                                         <label class="block">Tasks</label>
                                         <div class="relative mb-2">
-                                            <input id="chore-tasks-filter" type="search" placeholder="Filter tasks" class="input input-sm input-bordered w-full pr-12" aria-label="Filter tasks" />
-                                            <button type="button" id="chore-tasks-clear" class="absolute right-2 top-1/2 -translate-y-1/2 btn btn-ghost btn-xs h-7 w-7 p-0 rounded-full flex items-center justify-center" aria-label="Clear tasks filter">✕</button>
+                                            <input id="chore-tasks-filter"
+                                                   type="search"
+                                                   placeholder="Filter tasks"
+                                                   class="input input-sm input-bordered w-full pr-12"
+                                                   aria-label="Filter tasks" />
+                                            <button type="button"
+                                                    id="chore-tasks-clear"
+                                                    class="absolute right-2 top-1/2 -translate-y-1/2 btn btn-ghost btn-xs h-7 w-7 p-0 rounded-full flex items-center justify-center"
+                                                    aria-label="Clear tasks filter">✕</button>
                                         </div>
-                                        <div id="chore-tasks-options" class="border rounded p-2 h-32 overflow-y-auto">
+                                        <div id="chore-tasks-options"
+                                             class="border rounded p-2 h-32 overflow-y-auto">
                                             {% with selected=chore_form.tasks.value %}
                                                 {% for t in tasks %}
                                                     <label class="flex items-center gap-2 py-1">
-                                                        <input type="checkbox" name="tasks" value="{{ t.id }}" class="chore-tasks-checkbox" {% if selected and t.id|stringformat:"s" in selected %}checked{% else %}{% if chore_form.instance and t in chore_form.instance.tasks.all %}checked{% endif %}{% endif %} />
+                                                        <input type="checkbox"
+                                                               name="tasks"
+                                                               value="{{ t.id }}"
+                                                               class="chore-tasks-checkbox"
+                                                               {% if selected and t.id|stringformat:"s" in selected %}checked{% else %}{% if chore_form.instance and t in chore_form.instance.tasks.all %}checked{% endif %}
+                                                               {% endif %} />
                                                         <span class="text-sm">{{ t.name }}</span>
                                                     </label>
                                                 {% endfor %}
@@ -173,7 +199,9 @@
                                     </div>
                                     <div class="mt-2">
                                         <div class="collapse">
-                                            <input id="collapse-instructions-video-toggle" type="checkbox" class="sr-only" />
+                                            <input id="collapse-instructions-video-toggle"
+                                                   type="checkbox"
+                                                   class="sr-only" />
                                             <label for="collapse-instructions-video-toggle" class="collapse-title p-0">
                                                 <div class="flex items-center justify-between">
                                                     <span class="font-semibold">Instructional video (optional)</span>
@@ -183,8 +211,12 @@
                                             <div class="collapse-content p-0 overflow-visible">
                                                 <div class="space-y-2 p-3 border rounded overflow-visible">
                                                     <div>
-                                                        <label class="block font-semibold">Upload video file
-                                                            <button type="button" class="btn btn-ghost btn-xs p-0 ml-2" title="Choose a video file to upload. If you prefer to use an external video link, leave this field blank." aria-label="Help: upload video">?</button>
+                                                        <label class="block font-semibold">
+                                                            Upload video file
+                                                            <button type="button"
+                                                                    class="btn btn-ghost btn-xs p-0 ml-2"
+                                                                    title="Choose a video file to upload. If you prefer to use an external video link, leave this field blank."
+                                                                    aria-label="Help: upload video">?</button>
                                                         </label>
                                                         {{ chore_form.instructions_video }}
                                                         {% if chore_form.instructions_video.errors %}
@@ -192,8 +224,12 @@
                                                         {% endif %}
                                                     </div>
                                                     <div>
-                                                        <label class="block">File display name (optional)
-                                                            <button type="button" class="btn btn-ghost btn-xs p-0 ml-2" title="A human-friendly name to show in the UI for this uploaded file." aria-label="Help: file display name">?</button>
+                                                        <label class="block">
+                                                            File display name (optional)
+                                                            <button type="button"
+                                                                    class="btn btn-ghost btn-xs p-0 ml-2"
+                                                                    title="A human-friendly name to show in the UI for this uploaded file."
+                                                                    aria-label="Help: file display name">?</button>
                                                         </label>
                                                         {{ chore_form.instructions_video_name }}
                                                         {% if chore_form.instructions_video_name.errors %}
@@ -201,8 +237,12 @@
                                                         {% endif %}
                                                     </div>
                                                     <div>
-                                                        <label class="block font-semibold">Or: External video URL
-                                                            <button type="button" class="btn btn-ghost btn-xs p-0 ml-2" title="Paste a public video URL (YouTube, Vimeo, etc.). If uploading a file above, leave this blank." aria-label="Help: external video URL">?</button>
+                                                        <label class="block font-semibold">
+                                                            Or: External video URL
+                                                            <button type="button"
+                                                                    class="btn btn-ghost btn-xs p-0 ml-2"
+                                                                    title="Paste a public video URL (YouTube, Vimeo, etc.). If uploading a file above, leave this blank."
+                                                                    aria-label="Help: external video URL">?</button>
                                                         </label>
                                                         {{ chore_form.instructions_video_source }}
                                                         {% if chore_form.instructions_video_source.errors %}
@@ -231,7 +271,10 @@
                                 </form>
                             </div>
                             <div class="quick-add-panel hidden" data-panel="location">
-                                <form id="location-form" method="post" action="{% url 'core:save_location' %}" class="space-y-2">
+                                <form id="location-form"
+                                      method="post"
+                                      action="{% url 'core:save_location' %}"
+                                      class="space-y-2">
                                     {% csrf_token %}
                                     <div>
                                         <label class="block">Location name</label>
@@ -251,10 +294,15 @@
                                         <label class="block">Notes</label>
                                         <div id="location-notes-inputs" class="space-y-2">
                                             <div class="flex gap-2">
-                                                <input id="location-note-text" type="text" class="input input-bordered w-full" placeholder="Add a note" />
+                                                <input id="location-note-text"
+                                                       type="text"
+                                                       class="input input-bordered w-full"
+                                                       placeholder="Add a note" />
                                                 <button type="button" id="add-location-note" class="btn btn-sm">Add</button>
                                             </div>
-                                            <ul id="location-notes-list" class="list-disc list-inside text-sm text-muted"></ul>
+                                            <ul id="location-notes-list"
+                                                class="list-disc list-inside text-sm text-muted">
+                                            </ul>
                                         </div>
                                         {{ location_form.notes }}
                                         {% if location_form.notes.errors %}
@@ -270,7 +318,9 @@
                                 </form>
                             </div>
                             <div class="quick-add-panel hidden" data-panel="equipment">
-                                <form method="post" action="{% url 'core:create_equipment' %}" class="space-y-2">
+                                <form method="post"
+                                      action="{% url 'core:create_equipment' %}"
+                                      class="space-y-2">
                                     {% csrf_token %}
                                     <div>
                                         {{ equipment_form.name.label_tag }}
@@ -297,10 +347,15 @@
                                         <label class="block">Notes</label>
                                         <div id="equipment-notes-inputs" class="space-y-2">
                                             <div class="flex gap-2">
-                                                <input id="equipment-note-text" type="text" class="input input-bordered w-full" placeholder="Add a note" />
+                                                <input id="equipment-note-text"
+                                                       type="text"
+                                                       class="input input-bordered w-full"
+                                                       placeholder="Add a note" />
                                                 <button type="button" id="add-equipment-note" class="btn btn-sm">Add</button>
                                             </div>
-                                            <ul id="equipment-notes-list" class="list-disc list-inside text-sm text-muted"></ul>
+                                            <ul id="equipment-notes-list"
+                                                class="list-disc list-inside text-sm text-muted">
+                                            </ul>
                                         </div>
                                         {{ equipment_form.notes }}
                                         {% if equipment_form.notes.errors %}
@@ -318,9 +373,7 @@
                                     <div>
                                         {{ task_form.name.label_tag }}
                                         {{ task_form.name }}
-                                        {% if task_form.name.errors %}
-                                            <p class="text-error text-sm mt-1">{{ task_form.name.errors|join:' ' }}</p>
-                                        {% endif %}
+                                        {% if task_form.name.errors %}<p class="text-error text-sm mt-1">{{ task_form.name.errors|join:' ' }}</p>{% endif %}
                                     </div>
                                     <div>
                                         <label class="block">Description</label>
@@ -332,14 +385,27 @@
                                     <div>
                                         <label class="block">Equipment</label>
                                         <div class="relative mb-2">
-                                            <input id="task-equipment-filter" type="search" placeholder="Filter equipment" class="input input-sm input-bordered w-full pr-12" aria-label="Filter equipment for task" />
-                                            <button type="button" id="task-equipment-clear" class="absolute right-2 top-1/2 -translate-y-1/2 btn btn-ghost btn-xs h-7 w-7 p-0 rounded-full flex items-center justify-center" aria-label="Clear equipment filter for task">✕</button>
+                                            <input id="task-equipment-filter"
+                                                   type="search"
+                                                   placeholder="Filter equipment"
+                                                   class="input input-sm input-bordered w-full pr-12"
+                                                   aria-label="Filter equipment for task" />
+                                            <button type="button"
+                                                    id="task-equipment-clear"
+                                                    class="absolute right-2 top-1/2 -translate-y-1/2 btn btn-ghost btn-xs h-7 w-7 p-0 rounded-full flex items-center justify-center"
+                                                    aria-label="Clear equipment filter for task">✕</button>
                                         </div>
-                                        <div id="task-equipment-options" class="border rounded p-2 h-32 overflow-y-auto">
+                                        <div id="task-equipment-options"
+                                             class="border rounded p-2 h-32 overflow-y-auto">
                                             {% with selected=task_form.equipment.value %}
                                                 {% for eq in equipment %}
                                                     <label class="flex items-center gap-2 py-1">
-                                                        <input type="checkbox" name="equipment" value="{{ eq.id }}" class="task-equipment-checkbox" {% if selected and eq.id|stringformat:"s" in selected %}checked{% else %}{% if task_form.instance and eq in task_form.instance.equipment.all %}checked{% endif %}{% endif %} />
+                                                        <input type="checkbox"
+                                                               name="equipment"
+                                                               value="{{ eq.id }}"
+                                                               class="task-equipment-checkbox"
+                                                               {% if selected and eq.id|stringformat:"s" in selected %}checked{% else %}{% if task_form.instance and eq in task_form.instance.equipment.all %}checked{% endif %}
+                                                               {% endif %} />
                                                         <span class="text-sm">{{ eq.name }}</span>
                                                     </label>
                                                 {% endfor %}
@@ -353,33 +419,41 @@
                                         <label class="block">Notes</label>
                                         <div id="task-notes-inputs" class="space-y-2">
                                             <div class="flex gap-2">
-                                                <input id="task-note-text" type="text" class="input input-bordered w-full" placeholder="Add a note" />
+                                                <input id="task-note-text"
+                                                       type="text"
+                                                       class="input input-bordered w-full"
+                                                       placeholder="Add a note" />
                                                 <button type="button" id="add-task-note" class="btn btn-sm">Add</button>
                                             </div>
-                                            <ul id="task-notes-list" class="list-disc list-inside text-sm text-muted"></ul>
+                                            <ul id="task-notes-list" class="list-disc list-inside text-sm text-muted">
+                                            </ul>
                                         </div>
                                         {{ task_form.notes }}
-                                        {% if task_form.notes.errors %}
-                                            <p class="text-error text-sm mt-1">{{ task_form.notes.errors|join:' ' }}</p>
-                                        {% endif %}
+                                        {% if task_form.notes.errors %}<p class="text-error text-sm mt-1">{{ task_form.notes.errors|join:' ' }}</p>{% endif %}
                                     </div>
                                     <div>
                                         <label class="block">Steps</label>
                                         <div id="task-steps-inputs" class="space-y-2">
                                             <div class="grid grid-cols-2 gap-2">
-                                                <input id="task-step-name" type="text" class="input input-bordered" placeholder="Step name" />
-                                                <input id="task-step-desc" type="text" class="input input-bordered" placeholder="Step description (optional)" />
+                                                <input id="task-step-name"
+                                                       type="text"
+                                                       class="input input-bordered"
+                                                       placeholder="Step name" />
+                                                <input id="task-step-desc"
+                                                       type="text"
+                                                       class="input input-bordered"
+                                                       placeholder="Step description (optional)" />
                                             </div>
                                             <div class="flex gap-2">
                                                 <button type="button" id="add-task-step" class="btn btn-sm">Add Step</button>
                                                 <span class="text-sm text-muted mt-2">Add multiple steps; reorder with the arrows.</span>
                                             </div>
-                                            <ul id="task-steps-list" class="list-decimal list-inside text-sm text-muted"></ul>
+                                            <ul id="task-steps-list"
+                                                class="list-decimal list-inside text-sm text-muted">
+                                            </ul>
                                         </div>
                                         {{ task_form.steps }}
-                                        {% if task_form.steps.errors %}
-                                            <p class="text-error text-sm mt-1">{{ task_form.steps.errors|join:' ' }}</p>
-                                        {% endif %}
+                                        {% if task_form.steps.errors %}<p class="text-error text-sm mt-1">{{ task_form.steps.errors|join:' ' }}</p>{% endif %}
                                     </div>
                                     <div class="mt-2">
                                         <button class="btn btn-sm btn-outline" type="submit">Add Task</button>
@@ -427,12 +501,12 @@
                                                 </td>
                                                 <td class="text-right">
                                                     <a href="#"
-                                                    class="btn btn-sm btn-ghost mr-2"
-                                                    data-chore-id="{{ chore.id }}"
-                                                    onclick="openEditChore({{ chore.id }})">Edit</a>
+                                                       class="btn btn-sm btn-ghost mr-2"
+                                                       data-chore-id="{{ chore.id }}"
+                                                       onclick="openEditChore({{ chore.id }})">Edit</a>
                                                     <form method="post"
-                                                        action="{% url 'core:delete_chore' chore.id %}"
-                                                        class="inline">
+                                                          action="{% url 'core:delete_chore' chore.id %}"
+                                                          class="inline">
                                                         {% csrf_token %}
                                                         <button class="btn btn-sm btn-error"
                                                                 onclick="return confirm('Delete this chore?')">
@@ -465,18 +539,30 @@
                                 <div id="tasks-list">
                                     {% if tasks %}
                                         {% for t in tasks %}
-                                            <div class="collapse card bg-base-100 shadow-sm rounded-lg mb-3" id="task-card-{{ t.id }}">
+                                            <div class="collapse card bg-base-100 shadow-sm rounded-lg mb-3"
+                                                 id="task-card-{{ t.id }}">
                                                 <input id="collapse-task-{{ t.id }}" type="checkbox" class="sr-only" />
-                                                <label for="collapse-task-{{ t.id }}" class="collapse-title flex items-start justify-between gap-4 cursor-pointer p-4">
+                                                <label for="collapse-task-{{ t.id }}"
+                                                       class="collapse-title flex items-start justify-between gap-4 cursor-pointer p-4">
                                                     <div class="flex-1">
                                                         <div class="font-semibold">{{ t.name }}</div>
                                                         <div class="text-sm text-muted">{{ t.description|truncatechars:140 }}</div>
                                                     </div>
                                                     <div class="flex items-center gap-2">
-                                                        <a href="#" data-action="open-edit-task" data-task-id="{{ t.id }}" class="btn btn-ghost btn-link">Edit</a>
-                                                        <form method="post" action="{% url 'core:delete_task' t.id %}" class="inline" onsubmit="event.stopPropagation();">
+                                                        <a href="#"
+                                                           data-action="open-edit-task"
+                                                           data-task-id="{{ t.id }}"
+                                                           class="btn btn-ghost btn-link">Edit</a>
+                                                        <form method="post"
+                                                              action="{% url 'core:delete_task' t.id %}"
+                                                              class="inline"
+                                                              onsubmit="event.stopPropagation();">
                                                             {% csrf_token %}
-                                                            <button type="submit" class="btn btn-ghost btn-link text-error" onclick="event.stopPropagation(); return confirm('Delete this task?')">Delete</button>
+                                                            <button type="submit"
+                                                                    class="btn btn-ghost btn-link text-error"
+                                                                    onclick="event.stopPropagation(); return confirm('Delete this task?')">
+                                                                Delete
+                                                            </button>
                                                         </form>
                                                     </div>
                                                 </label>
@@ -484,16 +570,19 @@
                                                     <div class="grid md:grid-cols-3 gap-4">
                                                         <div class="md:col-span-2">
                                                             {% if t.description %}
-                                                            <h3 class="font-medium">Description</h3>
-                                                            <p class="text-sm text-muted">{{ t.description }}</p>
+                                                                <h3 class="font-medium">Description</h3>
+                                                                <p class="text-sm text-muted">{{ t.description }}</p>
                                                             {% endif %}
                                                             {% if t.steps %}
-                                                            <h3 class="font-medium mt-4">Steps</h3>
-                                                            <ul class="list-decimal list-inside text-sm text-muted">
-                                                                {% for s in t.steps %}
-                                                                    <li>{{ s.name }}{% if s.description %}: {{ s.description }}{% endif %}</li>
-                                                                {% endfor %}
-                                                            </ul>
+                                                                <h3 class="font-medium mt-4">Steps</h3>
+                                                                <ul class="list-decimal list-inside text-sm text-muted">
+                                                                    {% for s in t.steps %}
+                                                                        <li>
+                                                                            {{ s.name }}
+                                                                            {% if s.description %}: {{ s.description }}{% endif %}
+                                                                        </li>
+                                                                    {% endfor %}
+                                                                </ul>
                                                             {% endif %}
                                                         </div>
                                                         <div class="md:col-span-1">
@@ -519,7 +608,8 @@
                     </div>
                     <div class="collapse bg-base-200 shadow-sm rounded-lg">
                         <input id="collapse-equipment-toggle" type="checkbox" class="sr-only" />
-                        <label for="collapse-equipment-toggle" class="collapse-title p-4 cursor-pointer">
+                        <label for="collapse-equipment-toggle"
+                               class="collapse-title p-4 cursor-pointer">
                             <div class="flex items-center justify-between">
                                 <h2 class="text-lg font-medium">Equipment</h2>
                                 <span class="text-sm text-muted">{{ equipment|length }} items</span>
@@ -531,15 +621,29 @@
                                     {% for eq in equipment %}
                                         <div class="collapse card bg-base-100 shadow-sm rounded-lg mb-3">
                                             <input id="collapse-equipment-{{ eq.id }}" type="checkbox" class="sr-only" />
-                                            <label for="collapse-equipment-{{ eq.id }}" class="collapse-title p-0 cursor-pointer">
+                                            <label for="collapse-equipment-{{ eq.id }}"
+                                                   class="collapse-title p-0 cursor-pointer">
                                                 <div class="flex items-center justify-between gap-4 p-4">
                                                     <div class="flex-1 min-w-0">
                                                         <h3 class="text-base font-semibold truncate mb-1">{{ eq.name }}</h3>
-                                                        <p class="text-sm text-muted truncate">{% if eq.description %}{{ eq.description|truncatechars:80 }}{% else %}&mdash;{% endif %}</p>
+                                                        <p class="text-sm text-muted truncate">
+                                                            {% if eq.description %}
+                                                                {{ eq.description|truncatechars:80 }}
+                                                            {% else %}
+                                                                &mdash;
+                                                            {% endif %}
+                                                        </p>
                                                     </div>
                                                     <div class="flex items-center gap-2 flex-shrink-0 whitespace-nowrap">
-                                                        <a href="#" class="btn btn-sm btn-ghost" data-action="open-edit-equipment" data-equipment-id="{{ eq.id }}" onclick="openEditEquipment({{ eq.id }}); return false;">Edit</a>
-                                                        <form method="post" action="{% url 'core:delete_equipment' eq.id %}" class="inline" onsubmit="return confirm('Delete this equipment item?');">
+                                                        <a href="#"
+                                                           class="btn btn-sm btn-ghost"
+                                                           data-action="open-edit-equipment"
+                                                           data-equipment-id="{{ eq.id }}"
+                                                           onclick="openEditEquipment({{ eq.id }}); return false;">Edit</a>
+                                                        <form method="post"
+                                                              action="{% url 'core:delete_equipment' eq.id %}"
+                                                              class="inline"
+                                                              onsubmit="return confirm('Delete this equipment item?');">
                                                             {% csrf_token %}
                                                             <button type="submit" class="btn btn-sm btn-error">Delete</button>
                                                         </form>
@@ -552,20 +656,30 @@
                                                         <div class="md:col-span-2 space-y-4">
                                                             <div>
                                                                 <h3 class="font-semibold">Location</h3>
-                                                                <p class="text-sm">{% if eq.location %}{{ eq.location.name }}{% else %}&mdash;{% endif %}</p>
+                                                                <p class="text-sm">
+                                                                    {% if eq.location %}
+                                                                        {{ eq.location.name }}
+                                                                    {% else %}
+                                                                        &mdash;
+                                                                    {% endif %}
+                                                                </p>
                                                             </div>
                                                             <div>
                                                                 <h3 class="font-semibold">Description</h3>
-                                                                <p class="text-sm">{% if eq.description %}{{ eq.description }}{% else %}&mdash;{% endif %}</p>
+                                                                <p class="text-sm">
+                                                                    {% if eq.description %}
+                                                                        {{ eq.description }}
+                                                                    {% else %}
+                                                                        &mdash;
+                                                                    {% endif %}
+                                                                </p>
                                                             </div>
                                                         </div>
                                                         <div>
                                                             <h3 class="font-semibold">Notes</h3>
                                                             {% if eq.notes %}
                                                                 <ul class="list-disc list-inside text-sm">
-                                                                    {% for note in eq.notes %}
-                                                                        <li>{{ note }}</li>
-                                                                    {% endfor %}
+                                                                    {% for note in eq.notes %}<li>{{ note }}</li>{% endfor %}
                                                                 </ul>
                                                             {% else %}
                                                                 <p class="text-sm">&mdash;</p>
@@ -584,7 +698,8 @@
                     </div>
                     <div class="collapse bg-base-200 shadow-sm rounded-lg">
                         <input id="collapse-locations-toggle" type="checkbox" class="sr-only" />
-                        <label for="collapse-locations-toggle" class="collapse-title p-4 cursor-pointer">
+                        <label for="collapse-locations-toggle"
+                               class="collapse-title p-4 cursor-pointer">
                             <div class="flex items-center justify-between">
                                 <h2 class="text-lg font-medium">Locations</h2>
                                 <span class="text-sm text-muted">{{ locations|length }} locations</span>
@@ -596,15 +711,27 @@
                                     {% for loc in locations %}
                                         <div class="collapse card bg-base-100 shadow-sm rounded-lg mb-3">
                                             <input id="collapse-location-{{ loc.id }}" type="checkbox" class="sr-only" />
-                                            <label for="collapse-location-{{ loc.id }}" class="collapse-title p-0 cursor-pointer">
+                                            <label for="collapse-location-{{ loc.id }}"
+                                                   class="collapse-title p-0 cursor-pointer">
                                                 <div class="flex items-center justify-between gap-4 p-4">
                                                     <div class="flex-1 min-w-0">
                                                         <h3 class="text-base font-semibold truncate mb-1">{{ loc.name }}</h3>
-                                                        <p class="text-sm text-muted truncate">{% if loc.description %}{{ loc.description|truncatechars:80 }}{% else %}&mdash;{% endif %}</p>
+                                                        <p class="text-sm text-muted truncate">
+                                                            {% if loc.description %}
+                                                                {{ loc.description|truncatechars:80 }}
+                                                            {% else %}
+                                                                &mdash;
+                                                            {% endif %}
+                                                        </p>
                                                     </div>
                                                     <div class="flex items-center gap-2 flex-shrink-0 whitespace-nowrap">
-                                                        <a href="#" class="btn btn-sm btn-ghost" onclick="openEditLocation({{ loc.id }}); return false;">Edit</a>
-                                                        <form method="post" action="{% url 'core:delete_location' loc.id %}" class="inline" onsubmit="return confirm('Delete this location?');">
+                                                        <a href="#"
+                                                           class="btn btn-sm btn-ghost"
+                                                           onclick="openEditLocation({{ loc.id }}); return false;">Edit</a>
+                                                        <form method="post"
+                                                              action="{% url 'core:delete_location' loc.id %}"
+                                                              class="inline"
+                                                              onsubmit="return confirm('Delete this location?');">
                                                             {% csrf_token %}
                                                             <button type="submit" class="btn btn-sm btn-error">Delete</button>
                                                         </form>
@@ -616,15 +743,19 @@
                                                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                                         <div class="md:col-span-2">
                                                             <h3 class="font-semibold">Description</h3>
-                                                            <p class="text-sm">{% if loc.description %}{{ loc.description }}{% else %}&mdash;{% endif %}</p>
+                                                            <p class="text-sm">
+                                                                {% if loc.description %}
+                                                                    {{ loc.description }}
+                                                                {% else %}
+                                                                    &mdash;
+                                                                {% endif %}
+                                                            </p>
                                                         </div>
                                                         <div>
                                                             <h3 class="font-semibold">Notes</h3>
                                                             {% if loc.notes %}
                                                                 <ul class="list-disc list-inside text-sm">
-                                                                    {% for note in loc.notes %}
-                                                                        <li>{{ note }}</li>
-                                                                    {% endfor %}
+                                                                    {% for note in loc.notes %}<li>{{ note }}</li>{% endfor %}
                                                                 </ul>
                                                             {% else %}
                                                                 <p class="text-sm">&mdash;</p>
@@ -642,11 +773,9 @@
                         </div>
                     </div>
                 </div>
-
             </section>
         </div>
     </div>
-
     <script src="{% static 'js/chores-open-edit.js' %}"></script>
     <script src="{% static 'js/chores-recurrence.js' %}"></script>
     <script src="{% static 'js/chores-tabs.js' %}"></script>
