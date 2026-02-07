@@ -58,7 +58,8 @@ def chores_view(request):
     # Provide data for listing and creation forms
     chores = Chore.objects.select_related('location').prefetch_related('equipment', 'tasks').all()
     locations = Location.objects.all()
-    equipment = Equipment.objects.all()
+    # Avoid N+1 when accessing equipment.location in templates by joining the FK
+    equipment = Equipment.objects.select_related('location').all()
     tasks = Task.objects.all()
     # If ?edit=<id> is present, load that chore into the form for editing
     edit_id = request.GET.get('edit')
@@ -218,11 +219,67 @@ def save_location(request):
 @login_required
 @require_POST
 def create_equipment(request):
+    # Backwards-compatible create endpoint; prefer save_equipment for AJAX upserts
     form = EquipmentForm(request.POST)
     if form.is_valid():
         eq = form.save()
         return redirect('core:chores')
     return HttpResponseBadRequest('Invalid equipment')
+
+
+@login_required
+@require_GET
+def equipment_detail_json(request, equipment_id):
+    eq = get_object_or_404(Equipment, id=equipment_id)
+    data = {
+        'id': eq.id,
+        'name': eq.name,
+        'description': eq.description or '',
+        'count': eq.count if hasattr(eq, 'count') else None,
+        'location': {'id': eq.location.id, 'name': eq.location.name} if eq.location else None,
+        'notes': eq.notes or [],
+    }
+    return JsonResponse(data)
+
+
+@login_required
+@require_POST
+def save_equipment(request):
+    data = request.POST.dict()
+    eq_id = data.get('id')
+    if eq_id:
+        instance = get_object_or_404(Equipment, id=eq_id)
+        form = EquipmentForm(request.POST, instance=instance)
+    else:
+        form = EquipmentForm(request.POST)
+    if form.is_valid():
+        eq = form.save()
+        is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
+        if is_ajax:
+            data = {
+                'id': eq.id,
+                'name': eq.name,
+                'description': eq.description or '',
+                'count': getattr(eq, 'count', None),
+                'location': {'id': eq.location.id, 'name': eq.location.name} if eq.location else None,
+                'notes': eq.notes or [],
+            }
+            return JsonResponse({'success': True, 'equipment': data})
+        return redirect('core:chores')
+    try:
+        errors = form.errors.get_json_data()
+    except Exception:
+        errors = {k: form.errors.get(k) for k in form.errors}
+    return JsonResponse({'errors': errors}, status=400)
+
+
+@login_required
+@require_POST
+def delete_equipment(request, equipment_id):
+    eq = get_object_or_404(Equipment, id=equipment_id)
+    eq.delete()
+    messages.success(request, 'Equipment deleted.')
+    return redirect('core:chores')
 
 
 @login_required
