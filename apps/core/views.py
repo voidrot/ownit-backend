@@ -27,7 +27,7 @@ class UserCreateForm(UserCreationForm):
         required=False,
         label='Birthdate',
         widget=forms.DateInput(attrs={'type': 'date', 'class': 'input input-bordered w-full'}),
-        help_text='Optional birth date of the user.'
+        help_text='Optional birth date of the user.',
     )
 
     class Meta:
