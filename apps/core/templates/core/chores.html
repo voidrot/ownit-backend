@@ -176,6 +176,24 @@
                                         {% endif %}
                                         <p class="text-sm text-muted mt-1">Select tasks to attach to this chore.</p>
                                     </div>
+                                    <div>
+                                        <label class="block">Notes</label>
+                                        <div id="chore-notes-inputs" class="space-y-2">
+                                            <div class="flex gap-2">
+                                                <input id="chore-note-text"
+                                                       type="text"
+                                                       class="input input-bordered w-full"
+                                                       placeholder="Add a note" />
+                                                <button type="button" id="add-chore-note" class="btn btn-sm">Add</button>
+                                            </div>
+                                            <ul id="chore-notes-list" class="list-disc list-inside text-sm text-muted"></ul>
+                                        </div>
+                                        {{ chore_form.notes }}
+                                        {% if chore_form.notes.errors %}
+                                            <p class="text-error text-sm mt-1">{{ chore_form.notes.errors|join:' ' }}</p>
+                                        {% endif %}
+                                        <p class="text-sm text-muted mt-1">Add optional notes for this chore.</p>
+                                    </div>
                                     <div class="flex items-center gap-4">
                                         <div>
                                             {{ chore_form.penalize_incomplete }}
@@ -491,56 +509,140 @@
                                 <h2 class="text-lg font-medium">Chores</h2>
                                 <span class="text-sm text-muted">{{ chores|length }} chores</span>
                             </div>
-                            <div class="overflow-x-auto mt-4">
-                                <table class="table table-zebra w-full">
-                                    <thead>
-                                        <tr>
-                                            <th>Name</th>
-                                            <th>Points</th>
-                                            <th>Location</th>
-                                            <th>Equipment</th>
-                                            <th class="text-right">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for chore in chores %}
-                                            <tr>
-                                                <td>{{ chore.name }}</td>
-                                                <td>{{ chore.points }}</td>
-                                                <td>
-                                                    {% if chore.location %}
-                                                        {{ chore.location.name }}
-                                                    {% else %}
-                                                        -
-                                                    {% endif %}
-                                                </td>
-                                                <td>
-                                                    {% for e in chore.equipment.all %}<span class="badge badge-outline mr-1">{{ e.name }}</span>{% endfor %}
-                                                </td>
-                                                <td class="text-right">
-                                                    <div class="flex items-center gap-2 justify-end whitespace-nowrap">
-                                                        <a href="#"
-                                                           class="btn btn-sm btn-ghost"
-                                                           data-chore-id="{{ chore.id }}"
-                                                           onclick="openEditChore({{ chore.id }}); return false;">Edit</a>
-                                                        <form method="post"
-                                                              action="{% url 'core:delete_chore' chore.id %}"
-                                                              class="inline"
-                                                              onsubmit="return confirm('Delete this chore?');">
-                                                            {% csrf_token %}
-                                                            <button type="submit" class="btn btn-sm btn-error">Delete</button>
-                                                        </form>
+                                    <div class="mt-4">
+                                        {% if chores %}
+                                            <div class="space-y-3">
+                                                {% for chore in chores %}
+                                                    <div class="collapse card bg-base-100 shadow-sm rounded-lg mb-3"
+                                                         id="chore-card-{{ chore.id }}"
+                                                         data-equipment-ids="{% for eq in chore.equipment.all %}{% if not forloop.first %},{% endif %}{{ eq.id }}{% endfor %}">
+                                                        <input id="collapse-chore-{{ chore.id }}" type="checkbox" class="sr-only" />
+                                                        <label for="collapse-chore-{{ chore.id }}"
+                                                               class="collapse-title p-0 cursor-pointer bg-base-300 border border-base-300 border-b-0 rounded-t-lg">
+                                                            <div class="flex items-center justify-between gap-4 p-4">
+                                                                <div class="flex items-start gap-3 flex-1 min-w-0">
+                                                                    <div class="flex-1 min-w-0">
+                                                                        <h3 class="text-base font-semibold truncate mb-1">{{ chore.name }}</h3>
+                                                                        <p class="text-sm text-muted truncate">{{ chore.description|default:'—'|truncatechars:120 }}</p>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="flex items-center gap-2 flex-shrink-0 whitespace-nowrap">
+                                                                    <span class="text-sm text-muted mr-2">{{ chore.points }} pts</span>
+                                                                    {% if chore.location %}<span class="text-sm text-muted mr-2">{{ chore.location.name }}</span>{% endif %}
+                                                                    <a href="#"
+                                                                       class="btn btn-sm btn-ghost"
+                                                                       data-action="open-edit-chore"
+                                                                       data-chore-id="{{ chore.id }}"
+                                                                       onclick="event.stopPropagation(); openEditChore && openEditChore({{ chore.id }}); return false;">Edit</a>
+                                                                    <form method="post"
+                                                                          action="{% url 'core:delete_chore' chore.id %}"
+                                                                          class="inline"
+                                                                          onsubmit="event.stopPropagation(); return confirm('Delete this chore?');">
+                                                                        {% csrf_token %}
+                                                                        <button type="submit" class="btn btn-sm btn-error">Delete</button>
+                                                                    </form>
+                                                                </div>
+                                                            </div>
+                                                        </label>
+                                                        <div class="collapse-content p-0 border-t border-base-200 bg-base-100">
+                                                            <div class="card-body">
+                                                                <div class="grid md:grid-cols-3 gap-4">
+                                                                    <div class="md:col-span-2 space-y-3">
+                                                                        {% if chore.description %}
+                                                                            <h3 class="font-medium">Description</h3>
+                                                                            <p class="text-sm text-muted">{{ chore.description }}</p>
+                                                                        {% endif %}
+
+                                                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                                            <div>
+                                                                                <h3 class="font-medium">Recurrence</h3>
+                                                                                <p class="text-sm text-muted">
+                                                                                    {% if chore.is_recurring %}
+                                                                                        {{ chore.get_recurrence_display }}
+                                                                                        {% if chore.recurrence == 'W' and chore.recurrence_day_of_week %} — {{ chore.recurrence_day_of_week }}{% endif %}
+                                                                                        {% if chore.recurrence == 'M' and chore.recurrence_day_of_month %} — day {{ chore.recurrence_day_of_month }}{% endif %}
+                                                                                    {% else %}
+                                                                                        One-time
+                                                                                    {% endif %}
+                                                                                </p>
+                                                                            </div>
+                                                                            <div>
+                                                                                <h3 class="font-medium">Point Value</h3>
+                                                                                <p class="text-sm text-muted">{{ chore.points }} points</p>
+
+                                                                                <h3 class="font-medium mt-3">Deadline</h3>
+                                                                                <p class="text-sm text-muted">
+                                                                                    {% if chore.time_due %}Due by {{ chore.time_due }}{% else %}&mdash;{% endif %}
+                                                                                </p>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div class="mt-3">
+                                                                            <h3 class="font-medium">Penalty {% if chore.penalize_incomplete %}(enabled){% else %}(disabled){% endif %}</h3>
+                                                                            <p class="text-sm text-muted">
+                                                                                {% if chore.penalize_incomplete %}
+                                                                                    {{ chore.penalty_amount }} points
+                                                                                {% else %}
+                                                                                    No penalty
+                                                                                {% endif %}
+                                                                            </p>
+                                                                        </div>
+
+                                                                        {% if chore.instructions_video or chore.instructions_video_source %}
+                                                                            <div>
+                                                                                <h3 class="font-medium">Instructional Video</h3>
+                                                                                <p class="text-sm text-muted">
+                                                                                    {% if chore.instructions_video_source %}
+                                                                                        <a href="{{ chore.instructions_video_source }}" target="_blank" rel="noopener" class="link link-primary">External video</a>
+                                                                                    {% elif chore.instructions_video %}
+                                                                                        <a href="{{ chore.instructions_video.url }}" target="_blank" rel="noopener" class="link link-primary">Download / view video</a>
+                                                                                    {% endif %}
+                                                                                </p>
+                                                                            </div>
+                                                                        {% endif %}
+
+                                                                        {# Assignments removed per request #}
+                                                                    </div>
+                                                                    <div class="md:col-span-1 self-start">
+                                                                        {% if chore.equipment.all %}
+                                                                            <h3 class="font-medium">Equipment</h3>
+                                                                            <p class="text-sm text-muted mb-3">
+                                                                                {% for e in chore.equipment.all %}
+                                                                                    <span class="badge badge-outline mr-1">{{ e.name }}</span>
+                                                                                {% endfor %}
+                                                                            </p>
+                                                                        {% endif %}
+
+                                                                        {% if chore.tasks.all %}
+                                                                            <h3 class="font-medium">Tasks</h3>
+                                                                            <ul class="list-disc list-inside text-sm text-muted mb-3">
+                                                                                {% for t in chore.tasks.all %}
+                                                                                    <li>{{ t.name }}</li>
+                                                                                {% endfor %}
+                                                                            </ul>
+                                                                        {% endif %}
+
+                                                                        <h3 class="font-medium">Notes</h3>
+                                                                        {% if chore.notes %}
+                                                                            <ul class="list-disc list-inside text-sm text-muted">
+                                                                                {% for n in chore.notes %}
+                                                                                    <li class="mb-1">{{ n }}</li>
+                                                                                {% endfor %}
+                                                                            </ul>
+                                                                        {% else %}
+                                                                            <div class="text-muted">No notes</div>
+                                                                        {% endif %}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                </td>
-                                            </tr>
-                                        {% empty %}
-                                            <tr>
-                                                <td colspan="5" class="text-center py-8 text-muted">No chores found</td>
-                                            </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
+                                                {% endfor %}
+                                            </div>
+                                        {% else %}
+                                            <div class="text-center py-8 text-muted">No chores found</div>
+                                        {% endif %}
+                                    </div>
                             <!-- Related lists moved below as separate daisyUI collapses -->
                         </div>
                     </div>

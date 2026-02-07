@@ -30,6 +30,7 @@ class ChoreForm(forms.ModelForm):
         fields = [
             'name',
             'description',
+            'notes',
             'points',
             'penalize_incomplete',
             'penalty_amount',
@@ -62,6 +63,8 @@ class ChoreForm(forms.ModelForm):
             'location': forms.Select(attrs={'class': 'select select-bordered w-full'}),
             'equipment': forms.SelectMultiple(attrs={'class': 'select select-bordered w-full'}),
             'tasks': forms.SelectMultiple(attrs={'class': 'select select-bordered w-full'}),
+            # notes will be populated by client UI as JSON; keep it hidden
+            'notes': forms.HiddenInput(),
         }
 
     def clean(self):
@@ -112,6 +115,29 @@ class ChoreForm(forms.ModelForm):
             cleaned['recurrence_day_of_month'] = None
 
         return cleaned
+
+    def clean_notes(self):
+        """Normalize notes input into a list of strings for the JSONField on Chore.
+
+        Accepts JSON array (preferred) or newline/comma separated text from the client UI.
+        """
+        raw = self.cleaned_data.get('notes')
+        if raw in (None, '', []):
+            return []
+        if isinstance(raw, str) and raw.strip().lower() in ('null', 'none'):
+            return []
+        if isinstance(raw, list):
+            return [str(x) for x in raw if x is not None and str(x).strip()]
+        try:
+            parsed = json.loads(raw)
+            if isinstance(parsed, list):
+                return [str(x) for x in parsed if x is not None and str(x).strip()]
+        except Exception:
+            pass
+        parts = [p.strip() for p in str(raw).replace('\r', '').split('\n') if p.strip()]
+        if len(parts) == 1 and ',' in parts[0]:
+            parts = [p.strip() for p in parts[0].split(',') if p.strip()]
+        return parts
 
 
 class LocationForm(forms.ModelForm):

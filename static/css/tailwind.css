@@ -8364,6 +8364,9 @@
   .text-gray-800 {
     color: var(--color-gray-800);
   }
+  .text-primary {
+    color: var(--color-primary);
+  }
   .text-red-500 {
     color: var(--color-red-500);
   }
