@@ -5,7 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.14"
 license = {text = "GPL-3.0-or-later"}
-license-text = { file = "GPL-LICENSE.md" }
+license-text = { file = "LICENSE" }
 dependencies = [
   "celery>=5.6.2",
   "cryptography>=46.0.4",
