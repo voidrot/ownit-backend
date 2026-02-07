@@ -291,6 +291,63 @@ def create_task(request):
         return redirect('core:chores')
     return HttpResponseBadRequest('Invalid task')
 
+
+@login_required
+@require_GET
+def task_detail_json(request, task_id):
+    t = get_object_or_404(Task, id=task_id)
+    data = {
+        'id': t.id,
+        'name': t.name,
+        'description': t.description or '',
+        'steps': t.steps or [],
+        'notes': t.notes or [],
+        'equipment': [ {'id': e.id, 'name': e.name} for e in t.equipment.all() ],
+    }
+    return JsonResponse(data)
+
+
+@login_required
+@require_POST
+def save_task(request):
+    data = request.POST.dict()
+    task_id = data.get('id')
+    if task_id:
+        instance = get_object_or_404(Task, id=task_id)
+        form = TaskForm(request.POST, instance=instance)
+    else:
+        form = TaskForm(request.POST)
+    if form.is_valid():
+        task = form.save()
+        # if equipment checkboxes present, set m2m
+        if 'equipment' in request.POST:
+            task.equipment.set(request.POST.getlist('equipment'))
+        is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
+        if is_ajax:
+            data = {
+                'id': task.id,
+                'name': task.name,
+                'description': task.description or '',
+                'steps': task.steps or [],
+                'notes': task.notes or [],
+            }
+            return JsonResponse({'success': True, 'task': data})
+        return redirect('core:chores')
+    try:
+        errors = form.errors.get_json_data()
+    except Exception:
+        errors = {k: form.errors.get(k) for k in form.errors}
+    return JsonResponse({'errors': errors}, status=400)
+
+
+@login_required
+@require_POST
+def delete_task(request, task_id):
+    t = get_object_or_404(Task, id=task_id)
+    t.delete()
+    messages.success(request, 'Task deleted.')
+    return redirect('core:chores')
+
 @login_required
 def behavior_view(request):
     """View for behavior management page."""

@@ -33,7 +33,9 @@ document.addEventListener('DOMContentLoaded', function () {
         const left = document.createElement('div');
         left.className = 'grow';
         const title = document.createElement('div');
-        title.className = 'font-medium';
+        // Use `font-semibold` so other parts of the code (save handler) can reliably
+        // find the step title using the same class.
+        title.className = 'font-semibold';
         title.textContent = s.name;
         const desc = document.createElement('div');
         desc.className = 'text-sm text-muted';
@@ -44,29 +46,40 @@ document.addEventListener('DOMContentLoaded', function () {
         const controls = document.createElement('div');
         controls.className = 'flex items-center gap-1';
 
-        const up = document.createElement('button');
-        up.type = 'button';
-        up.className = 'btn btn-ghost btn-xs';
-        up.textContent = '↑';
-        up.disabled = idx === 0;
-        up.addEventListener('click', function () { move(idx, idx - 1); });
+        // Only render ordering controls for non-persisted (new) steps. When
+        // editing an existing task we don't want to show arrows for persisted
+        // steps to avoid accidental reordering of persisted data.
+        let up = null, down = null;
+        if (!s.persisted) {
+          up = document.createElement('button');
+          up.type = 'button';
+          up.className = 'btn btn-ghost btn-xs';
+          up.textContent = '↑';
+          up.disabled = idx === 0;
+          up.addEventListener('click', function () { move(idx, idx - 1); });
 
-        const down = document.createElement('button');
-        down.type = 'button';
-        down.className = 'btn btn-ghost btn-xs';
-        down.textContent = '↓';
-        down.disabled = idx === steps.length - 1;
-        down.addEventListener('click', function () { move(idx, idx + 1); });
+          down = document.createElement('button');
+          down.type = 'button';
+          down.className = 'btn btn-ghost btn-xs';
+          down.textContent = '↓';
+          down.disabled = idx === steps.length - 1;
+          down.addEventListener('click', function () { move(idx, idx + 1); });
+        }
 
         const del = document.createElement('button');
         del.type = 'button';
         del.className = 'btn btn-error btn-xs';
         del.textContent = 'Remove';
-        del.addEventListener('click', function () { remove(idx); });
+        // Persisted steps (preloaded from an existing task) should not show a
+        // remove button by default to avoid accidental deletion when editing.
+        // Steps passed with a truthy `persisted` flag will hide the delete control.
+        if (!s.persisted) {
+          del.addEventListener('click', function () { remove(idx); });
+          controls.appendChild(del);
+        }
 
-        controls.appendChild(up);
-        controls.appendChild(down);
-        controls.appendChild(del);
+        if (up) controls.appendChild(up);
+        if (down) controls.appendChild(down);
 
         li.appendChild(left);
         li.appendChild(controls);
@@ -82,7 +95,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function addStep(name, desc) {
-      steps.push({name: String(name).trim(), description: String(desc || '')});
+      steps.push({name: String(name).trim(), description: String(desc || ''), persisted: false});
       render();
     }
 
@@ -113,7 +126,15 @@ document.addEventListener('DOMContentLoaded', function () {
       try {
         const parsed = JSON.parse(hidden.value);
         if (Array.isArray(parsed)) {
-          steps = parsed.map(p => ({name: p.name || '', description: p.description || '', order: (p.order != null ? p.order : 0)}));
+          // Map incoming structure into internal step objects. Preserve an
+          // optional `persisted` flag if present so we can render controls
+          // appropriately when editing an existing task.
+          steps = parsed.map((p, idx) => ({
+            name: p.name || '',
+            description: p.description || '',
+            order: (p.order != null ? p.order : idx),
+            persisted: !!p.persisted || false,
+          }));
           // sort by order, fallback to index
           steps.sort((a,b) => (a.order - b.order));
         }
@@ -122,6 +143,25 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     }
     render();
+    // expose a small API so other scripts (open-edit) can populate steps
+    window._taskStepsUI = {
+      setSteps: function(arr, opts) {
+        try {
+          if (!Array.isArray(arr)) return;
+          steps = arr.map((p, idx) => ({
+            name: p.name || '',
+            description: p.description || '',
+            order: (p.order != null ? p.order : idx),
+            persisted: !!(opts && opts.persisted) || !!p.persisted || false,
+          }));
+          steps.sort((a,b) => (a.order - b.order));
+          render();
+        } catch (e) { console.warn('setSteps failed', e); }
+      },
+      getSteps: function() {
+        return steps.map((s, i) => ({ name: s.name, description: s.description || '', order: i }));
+      }
+    };
   } catch (err) {
     console.error('Steps UI error', err);
   }

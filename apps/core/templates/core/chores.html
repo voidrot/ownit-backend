@@ -461,31 +461,59 @@
                             </div>
                         </label>
                         <div class="collapse-content p-0">
-                            <div class="overflow-x-auto p-4">
-                                <table class="table table-zebra w-full">
-                                    <thead>
-                                        <tr>
-                                            <th>Name</th>
-                                            <th class="text-right">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% if tasks %}
-                                            {% for t in tasks %}
-                                                <tr>
-                                                    <td>{{ t.name }}</td>
-                                                    <td class="text-right">
-                                                        <a href="#" class="btn btn-sm btn-ghost" onclick="return false">View</a>
-                                                    </td>
-                                                </tr>
-                                            {% endfor %}
-                                        {% else %}
-                                            <tr>
-                                                <td colspan="2" class="text-center py-8 text-muted">No tasks found</td>
-                                            </tr>
-                                        {% endif %}
-                                    </tbody>
-                                </table>
+                            <div class="p-4">
+                                <div id="tasks-list">
+                                    {% if tasks %}
+                                        {% for t in tasks %}
+                                            <div class="collapse card bg-base-100 shadow-sm rounded-lg mb-3" id="task-card-{{ t.id }}">
+                                                <input id="collapse-task-{{ t.id }}" type="checkbox" class="sr-only" />
+                                                <label for="collapse-task-{{ t.id }}" class="collapse-title flex items-start justify-between gap-4 cursor-pointer p-4">
+                                                    <div class="flex-1">
+                                                        <div class="font-semibold">{{ t.name }}</div>
+                                                        <div class="text-sm text-muted">{{ t.description|truncatechars:140 }}</div>
+                                                    </div>
+                                                    <div class="flex items-center gap-2">
+                                                        <a href="#" data-action="open-edit-task" data-task-id="{{ t.id }}" class="btn btn-ghost btn-link">Edit</a>
+                                                        <form method="post" action="{% url 'core:delete_task' t.id %}" class="inline" onsubmit="event.stopPropagation();">
+                                                            {% csrf_token %}
+                                                            <button type="submit" class="btn btn-ghost btn-link text-error" onclick="event.stopPropagation(); return confirm('Delete this task?')">Delete</button>
+                                                        </form>
+                                                    </div>
+                                                </label>
+                                                <div class="collapse-content">
+                                                    <div class="grid md:grid-cols-3 gap-4">
+                                                        <div class="md:col-span-2">
+                                                            {% if t.description %}
+                                                            <h3 class="font-medium">Description</h3>
+                                                            <p class="text-sm text-muted">{{ t.description }}</p>
+                                                            {% endif %}
+                                                            {% if t.steps %}
+                                                            <h3 class="font-medium mt-4">Steps</h3>
+                                                            <ul class="list-decimal list-inside text-sm text-muted">
+                                                                {% for s in t.steps %}
+                                                                    <li>{{ s.name }}{% if s.description %}: {{ s.description }}{% endif %}</li>
+                                                                {% endfor %}
+                                                            </ul>
+                                                            {% endif %}
+                                                        </div>
+                                                        <div class="md:col-span-1">
+                                                            <h3 class="font-medium">Notes</h3>
+                                                            <div class="text-sm text-muted">
+                                                                {% for n in t.notes %}
+                                                                    <div class="mb-2">{{ n }}</div>
+                                                                {% empty %}
+                                                                    <div class="text-muted">No notes</div>
+                                                                {% endfor %}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    {% else %}
+                                        <div class="text-center py-8 text-muted">No tasks found</div>
+                                    {% endif %}
+                                </div>
                             </div>
                         </div>
                     </div>
