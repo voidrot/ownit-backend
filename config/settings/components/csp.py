@@ -12,6 +12,6 @@ CONTENT_SECURITY_POLICY_REPORT_ONLY = {
         'script-src': [SELF],
         'style-src': [SELF],
         'upgrade-insecure-requests': True,
-        'report-uri': '/csp-report/',
+        # 'report-uri': '/csp-report/',
     },
 }

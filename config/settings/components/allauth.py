@@ -1,4 +1,5 @@
 from config.settings.components.base import DEBUG
+
 # django-allauth config
 ACCOUNT_LOGIN_METHODS = {'email', 'username'}
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'

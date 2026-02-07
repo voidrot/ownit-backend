@@ -16,7 +16,7 @@ SECRET_KEY = env.str('DJANGO_SECRET_KEY', default='insecure-django-secret-key-CH
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool('DJANGO_DEBUG', default=False)
 
-ALLOWED_HOSTS = env.list('DJANGO_ALLOWED_HOSTS', default=["*"])
+ALLOWED_HOSTS = env.list('DJANGO_ALLOWED_HOSTS', default=['*'])
 
 
 # Application definition
@@ -47,7 +47,7 @@ INSTALLED_APPS = [
     'apps.users',
     'apps.pages',
     'apps.chores',
-    'apps.behavior'
+    'apps.behavior',
 ]
 
 MIDDLEWARE = [

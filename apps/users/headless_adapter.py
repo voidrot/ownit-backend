@@ -31,18 +31,18 @@ class GroupAwareHeadlessAdapter(DefaultHeadlessAdapter):
         else:
             id_dc = str(user.pk)
         if account_settings.USER_MODEL_USERNAME_FIELD:
-            kwargs["username"] = user_username(user)
+            kwargs['username'] = user_username(user)
         if user.pk:
             email = EmailAddress.objects.get_primary_email(user)
         else:
             email = None
         kwargs.update(
             {
-                "id": id_dc,
-                "email": email if email else None,
-                "display": user_display(user),
-                "has_usable_password": user.has_usable_password(),
-                "groups": self._group_names(user),
+                'id': id_dc,
+                'email': email if email else None,
+                'display': user_display(user),
+                'has_usable_password': user.has_usable_password(),
+                'groups': self._group_names(user),
             }
         )
         return UserDc(**kwargs)
@@ -62,7 +62,7 @@ class GroupAwareHeadlessAdapter(DefaultHeadlessAdapter):
             id_example = 123
         else:
             id_type = str
-            id_example = "uid"
+            id_example = 'uid'
 
         def dc_field(attr, typ, description, example):
             return (
@@ -70,44 +70,40 @@ class GroupAwareHeadlessAdapter(DefaultHeadlessAdapter):
                 typ,
                 dataclasses.field(
                     metadata={
-                        "description": description,
-                        "example": example,
+                        'description': description,
+                        'example': example,
                     }
                 ),
             )
 
         fields.extend(
             [
-                dc_field("id", Optional[id_type], "The user ID.", id_example),
+                dc_field('id', Optional[id_type], 'The user ID.', id_example),
+                dc_field('display', str, 'The display name for the user.', 'Magic Wizard'),
+                dc_field('email', Optional[str], 'The email address.', 'email@domain.org'),
                 dc_field(
-                    "display", str, "The display name for the user.", "Magic Wizard"
-                ),
-                dc_field(
-                    "email", Optional[str], "The email address.", "email@domain.org"
-                ),
-                dc_field(
-                    "has_usable_password",
+                    'has_usable_password',
                     bool,
-                    "Whether or not the account has a password set.",
+                    'Whether or not the account has a password set.',
                     True,
                 ),
                 dc_field(
-                    "groups",
+                    'groups',
                     List[str],
-                    "The group names assigned to the user.",
-                    ["parent", "child"],
+                    'The group names assigned to the user.',
+                    ['parent', 'child'],
                 ),
             ]
         )
         if account_settings.USER_MODEL_USERNAME_FIELD:
-            fields.append(dc_field("username", str, "The username.", "wizard"))
-        return dataclasses.make_dataclass("User", fields)
+            fields.append(dc_field('username', str, 'The username.', 'wizard'))
+        return dataclasses.make_dataclass('User', fields)
 
     def _group_names(self, user: Any) -> List[str]:
         """
         Return the user's group names as a list of strings.
         """
-        if not user or not getattr(user, "pk", None):
+        if not user or not getattr(user, 'pk', None):
             # Avoid querying groups for unsaved users.
             return []
-        return list(user.groups.values_list("name", flat=True))
+        return list(user.groups.values_list('name', flat=True))

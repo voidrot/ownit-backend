@@ -1,0 +1,506 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Chores — Portal{% endblock %}
+{% block content %}
+    <div class="container mx-auto px-4 py-6">
+        <div class="flex flex-col gap-6 md:flex-row">
+            <section class="w-full md:w-1/3">
+                <div class="mt-4">
+                    <h4 class="font-medium">Create / Update</h4>
+                    <div class="mt-2">
+                        <div role="tablist" aria-label="Create / Update tabs" class="tabs">
+                            <button type="button"
+                                    role="tab"
+                                    class="tab tab-lifted tab-active"
+                                    data-tab="chore"
+                                    aria-selected="true">Create Chore</button>
+                            <button type="button"
+                                    role="tab"
+                                    class="tab tab-lifted"
+                                    data-tab="location"
+                                    aria-selected="false">Location</button>
+                            <button type="button"
+                                    role="tab"
+                                    class="tab tab-lifted"
+                                    data-tab="equipment"
+                                    aria-selected="false">Equipment</button>
+                            <button type="button"
+                                    role="tab"
+                                    class="tab tab-lifted"
+                                    data-tab="task"
+                                    aria-selected="false">Task</button>
+                        </div>
+                        <div class="mt-3">
+                            <div class="quick-add-panel" data-panel="chore">
+                                <form method="post"
+                                      action="{% url 'core:save_chore' %}"
+                                      class="mt-0 space-y-3"
+                                      enctype="multipart/form-data">
+                                    {% csrf_token %}
+                                    {% if chore_form.non_field_errors %}
+                                        <div class="alert alert-error mb-2">
+                                            <ul class="list-disc list-inside">
+                                                {% for err in chore_form.non_field_errors %}<li>{{ err }}</li>{% endfor %}
+                                            </ul>
+                                        </div>
+                                    {% endif %}
+                                    <div>
+                                        {{ chore_form.name.label_tag }}
+                                        {{ chore_form.name }}
+                                        {% if chore_form.name.errors %}<p class="text-error text-sm mt-1">{{ chore_form.name.errors|join:' ' }}</p>{% endif %}
+                                    </div>
+                                    <div>
+                                        {{ chore_form.description.label_tag }}
+                                        {{ chore_form.description }}
+                                        {% if chore_form.description.errors %}
+                                            <p class="text-error text-sm mt-1">{{ chore_form.description.errors|join:' ' }}</p>
+                                        {% endif %}
+                                    </div>
+                                    <div class="flex gap-2 items-end">
+                                        <div class="flex-1">
+                                            {{ chore_form.points.label_tag }}
+                                            {{ chore_form.points }}
+                                            {% if chore_form.points.errors %}
+                                                <p class="text-error text-sm mt-1">{{ chore_form.points.errors|join:' ' }}</p>
+                                            {% endif %}
+                                        </div>
+                                        <div>
+                                            {{ chore_form.is_recurring }}
+                                            {{ chore_form.is_recurring.label_tag }}
+                                            {% if chore_form.is_recurring.errors %}
+                                                <p class="text-error text-sm mt-1">{{ chore_form.is_recurring.errors|join:' ' }}</p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div id="recurrence-block" class="space-y-2">
+                                        <div>
+                                            {{ chore_form.recurrence.label_tag }}
+                                            {{ chore_form.recurrence }}
+                                            {% if chore_form.recurrence.errors %}
+                                                <p class="text-error text-sm mt-1">{{ chore_form.recurrence.errors|join:' ' }}</p>
+                                            {% endif %}
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <div>
+                                                {{ chore_form.recurrence_day_of_week.label_tag }}
+                                                {{ chore_form.recurrence_day_of_week }}
+                                                {% if chore_form.recurrence_day_of_week.errors %}
+                                                    <p class="text-error text-sm mt-1">{{ chore_form.recurrence_day_of_week.errors|join:' ' }}</p>
+                                                {% endif %}
+                                            </div>
+                                            <div>
+                                                {{ chore_form.recurrence_day_of_month.label_tag }}
+                                                {{ chore_form.recurrence_day_of_month }}
+                                                {% if chore_form.recurrence_day_of_month.errors %}
+                                                    <p class="text-error text-sm mt-1">{{ chore_form.recurrence_day_of_month.errors|join:' ' }}</p>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <div>
+                                            {{ chore_form.location.label_tag }}
+                                            {{ chore_form.location }}
+                                            {% if chore_form.location.errors %}
+                                                <p class="text-error text-sm mt-1">{{ chore_form.location.errors|join:' ' }}</p>
+                                            {% endif %}
+                                        </div>
+                                        <div>
+                                            {{ chore_form.time_due.label_tag }}
+                                            {{ chore_form.time_due }}
+                                            {% if chore_form.time_due.errors %}
+                                                <p class="text-error text-sm mt-1">{{ chore_form.time_due.errors|join:' ' }}</p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        {{ chore_form.equipment.label_tag }}
+                                        {{ chore_form.equipment }}
+                                        {% if chore_form.equipment.errors %}
+                                            <p class="text-error text-sm mt-1">{{ chore_form.equipment.errors|join:' ' }}</p>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        {{ chore_form.tasks.label_tag }}
+                                        {{ chore_form.tasks }}
+                                        {% if chore_form.tasks.errors %}
+                                            <p class="text-error text-sm mt-1">{{ chore_form.tasks.errors|join:' ' }}</p>
+                                        {% endif %}
+                                    </div>
+                                    <div class="flex items-center gap-4">
+                                        <div>
+                                            {{ chore_form.penalize_incomplete }}
+                                            {{ chore_form.penalize_incomplete.label_tag }}
+                                            {% if chore_form.penalize_incomplete.errors %}
+                                                <p class="text-error text-sm mt-1">{{ chore_form.penalize_incomplete.errors|join:' ' }}</p>
+                                            {% endif %}
+                                        </div>
+                                        <div class="w-40">
+                                            {{ chore_form.penalty_amount.label_tag }}
+                                            {{ chore_form.penalty_amount }}
+                                            {% if chore_form.penalty_amount.errors %}
+                                                <p class="text-error text-sm mt-1">{{ chore_form.penalty_amount.errors|join:' ' }}</p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="mt-2">
+                                        <label class="block">Instructions video (upload or external)</label>
+                                        {{ chore_form.instructions_video }}
+                                        {% if chore_form.instructions_video.errors %}
+                                            <p class="text-error text-sm mt-1">{{ chore_form.instructions_video.errors|join:' ' }}</p>
+                                        {% endif %}
+                                        {{ chore_form.instructions_video_name }}
+                                        {% if chore_form.instructions_video_name.errors %}
+                                            <p class="text-error text-sm mt-1">{{ chore_form.instructions_video_name.errors|join:' ' }}</p>
+                                        {% endif %}
+                                        {{ chore_form.instructions_video_source }}
+                                        {% if chore_form.instructions_video_source.errors %}
+                                            <p class="text-error text-sm mt-1">{{ chore_form.instructions_video_source.errors|join:' ' }}</p>
+                                        {% endif %}
+                                    </div>
+                                    {% if chore_form.instance and chore_form.instance.pk %}
+                                        <input type="hidden" name="id" value="{{ chore_form.instance.pk }}" />
+                                    {% endif %}
+                                    <div class="flex items-center gap-2 mt-3">
+                                        <button class="btn btn-primary" type="submit">
+                                            {% if chore_form.instance and chore_form.instance.pk %}
+                                                Update chore
+                                            {% else %}
+                                                Create chore
+                                            {% endif %}
+                                        </button>
+                                        {% if chore_form.instance and chore_form.instance.pk %}
+                                            <a href="{% url 'core:chores' %}" class="btn btn-ghost">Cancel</a>
+                                        {% endif %}
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="quick-add-panel hidden" data-panel="location">
+                                <form method="post" action="{% url 'core:create_location' %}" class="space-y-2">
+                                    {% csrf_token %}
+                                    <div>
+                                        <label class="block">Location name</label>
+                                        {{ location_form.name }}
+                                        {% if location_form.name.errors %}
+                                            <p class="text-error text-sm mt-1">{{ location_form.name.errors|join:' ' }}</p>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <label class="block">Description</label>
+                                        {{ location_form.description }}
+                                        {% if location_form.description.errors %}
+                                            <p class="text-error text-sm mt-1">{{ location_form.description.errors|join:' ' }}</p>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <label class="block">Notes</label>
+                                        <div id="location-notes-inputs" class="space-y-2">
+                                            <div class="flex gap-2">
+                                                <input id="location-note-text" type="text" class="input input-bordered w-full" placeholder="Add a note" />
+                                                <button type="button" id="add-location-note" class="btn btn-sm">Add</button>
+                                            </div>
+                                            <ul id="location-notes-list" class="list-disc list-inside text-sm text-muted"></ul>
+                                        </div>
+                                        {{ location_form.notes }}
+                                        {% if location_form.notes.errors %}
+                                            <p class="text-error text-sm mt-1">{{ location_form.notes.errors|join:' ' }}</p>
+                                        {% endif %}
+                                    </div>
+                                    <div class="mt-2">
+                                        <button class="btn btn-sm btn-outline" type="submit">Add Location</button>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="quick-add-panel hidden" data-panel="equipment">
+                                <form method="post" action="{% url 'core:create_equipment' %}" class="space-y-2">
+                                    {% csrf_token %}
+                                    <div>
+                                        {{ equipment_form.name.label_tag }}
+                                        {{ equipment_form.name }}
+                                        {% if equipment_form.name.errors %}
+                                            <p class="text-error text-sm mt-1">{{ equipment_form.name.errors|join:' ' }}</p>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <label class="block">Description</label>
+                                        {{ equipment_form.description }}
+                                        {% if equipment_form.description.errors %}
+                                            <p class="text-error text-sm mt-1">{{ equipment_form.description.errors|join:' ' }}</p>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <label class="block">Location</label>
+                                        {{ equipment_form.location }}
+                                        {% if equipment_form.location.errors %}
+                                            <p class="text-error text-sm mt-1">{{ equipment_form.location.errors|join:' ' }}</p>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <label class="block">Notes</label>
+                                        <div id="equipment-notes-inputs" class="space-y-2">
+                                            <div class="flex gap-2">
+                                                <input id="equipment-note-text" type="text" class="input input-bordered w-full" placeholder="Add a note" />
+                                                <button type="button" id="add-equipment-note" class="btn btn-sm">Add</button>
+                                            </div>
+                                            <ul id="equipment-notes-list" class="list-disc list-inside text-sm text-muted"></ul>
+                                        </div>
+                                        {{ equipment_form.notes }}
+                                        {% if equipment_form.notes.errors %}
+                                            <p class="text-error text-sm mt-1">{{ equipment_form.notes.errors|join:' ' }}</p>
+                                        {% endif %}
+                                    </div>
+                                    <div class="mt-2">
+                                        <button class="btn btn-sm btn-outline" type="submit">Add Equipment</button>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="quick-add-panel hidden" data-panel="task">
+                                <form method="post" action="{% url 'core:create_task' %}" class="space-y-2">
+                                    {% csrf_token %}
+                                    <div>
+                                        {{ task_form.name.label_tag }}
+                                        {{ task_form.name }}
+                                        {% if task_form.name.errors %}
+                                            <p class="text-error text-sm mt-1">{{ task_form.name.errors|join:' ' }}</p>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <label class="block">Description</label>
+                                        {{ task_form.description }}
+                                        {% if task_form.description.errors %}
+                                            <p class="text-error text-sm mt-1">{{ task_form.description.errors|join:' ' }}</p>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <label class="block">Equipment</label>
+                                        {{ task_form.equipment }}
+                                        {% if task_form.equipment.errors %}
+                                            <p class="text-error text-sm mt-1">{{ task_form.equipment.errors|join:' ' }}</p>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <label class="block">Notes</label>
+                                        <div id="task-notes-inputs" class="space-y-2">
+                                            <div class="flex gap-2">
+                                                <input id="task-note-text" type="text" class="input input-bordered w-full" placeholder="Add a note" />
+                                                <button type="button" id="add-task-note" class="btn btn-sm">Add</button>
+                                            </div>
+                                            <ul id="task-notes-list" class="list-disc list-inside text-sm text-muted"></ul>
+                                        </div>
+                                        {{ task_form.notes }}
+                                        {% if task_form.notes.errors %}
+                                            <p class="text-error text-sm mt-1">{{ task_form.notes.errors|join:' ' }}</p>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <label class="block">Steps</label>
+                                        <div id="task-steps-inputs" class="space-y-2">
+                                            <div class="grid grid-cols-2 gap-2">
+                                                <input id="task-step-name" type="text" class="input input-bordered" placeholder="Step name" />
+                                                <input id="task-step-desc" type="text" class="input input-bordered" placeholder="Step description (optional)" />
+                                            </div>
+                                            <div class="flex gap-2">
+                                                <button type="button" id="add-task-step" class="btn btn-sm">Add Step</button>
+                                                <span class="text-sm text-muted mt-2">Add multiple steps; reorder with the arrows.</span>
+                                            </div>
+                                            <ul id="task-steps-list" class="list-decimal list-inside text-sm text-muted"></ul>
+                                        </div>
+                                        {{ task_form.steps }}
+                                        {% if task_form.steps.errors %}
+                                            <p class="text-error text-sm mt-1">{{ task_form.steps.errors|join:' ' }}</p>
+                                        {% endif %}
+                                    </div>
+                                    <div class="mt-2">
+                                        <button class="btn btn-sm btn-outline" type="submit">Add Task</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section class="w-full md:w-2/3">
+                <!-- Top related cards: Tasks, Equipment, Locations (placed to right of create tabs) -->
+                <div class="grid gap-4 mb-4">
+                    <div class="card bg-base-200 shadow-sm">
+                        <div class="card-body">
+                            <div class="flex items-center justify-between">
+                                <h2 class="text-lg font-medium">Chores</h2>
+                                <span class="text-sm text-muted">{{ chores|length }} chores</span>
+                            </div>
+                            <div class="overflow-x-auto mt-4">
+                                <table class="table table-zebra w-full">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Points</th>
+                                            <th>Location</th>
+                                            <th>Equipment</th>
+                                            <th class="text-right">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for chore in chores %}
+                                            <tr>
+                                                <td>{{ chore.name }}</td>
+                                                <td>{{ chore.points }}</td>
+                                                <td>
+                                                    {% if chore.location %}
+                                                        {{ chore.location.name }}
+                                                    {% else %}
+                                                        -
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% for e in chore.equipment.all %}<span class="badge badge-outline mr-1">{{ e.name }}</span>{% endfor %}
+                                                </td>
+                                                <td class="text-right">
+                                                    <a href="#"
+                                                    class="btn btn-sm btn-ghost mr-2"
+                                                    data-chore-id="{{ chore.id }}"
+                                                    onclick="openEditChore({{ chore.id }})">Edit</a>
+                                                    <form method="post"
+                                                        action="{% url 'core:delete_chore' chore.id %}"
+                                                        class="inline">
+                                                        {% csrf_token %}
+                                                        <button class="btn btn-sm btn-error"
+                                                                onclick="return confirm('Delete this chore?')">
+                                                            Delete
+                                                        </button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                        {% empty %}
+                                            <tr>
+                                                <td colspan="5" class="text-center py-8 text-muted">No chores found</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- Related lists moved below as separate daisyUI collapses -->
+                        </div>
+                    </div>
+                    <div class="collapse bg-base-200 shadow-sm rounded-lg">
+                        <input id="collapse-tasks-toggle" type="checkbox" class="sr-only" />
+                        <label for="collapse-tasks-toggle" class="collapse-title p-4 cursor-pointer">
+                            <div class="flex items-center justify-between">
+                                <h2 class="text-lg font-medium">Tasks</h2>
+                                <span class="text-sm text-muted">{{ tasks|length }} tasks</span>
+                            </div>
+                        </label>
+                        <div class="collapse-content p-0">
+                            <div class="overflow-x-auto p-4">
+                                <table class="table table-zebra w-full">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th class="text-right">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% if tasks %}
+                                            {% for t in tasks %}
+                                                <tr>
+                                                    <td>{{ t.name }}</td>
+                                                    <td class="text-right">
+                                                        <a href="#" class="btn btn-sm btn-ghost" onclick="return false">View</a>
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        {% else %}
+                                            <tr>
+                                                <td colspan="2" class="text-center py-8 text-muted">No tasks found</td>
+                                            </tr>
+                                        {% endif %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="collapse bg-base-200 shadow-sm rounded-lg">
+                        <input id="collapse-equipment-toggle" type="checkbox" class="sr-only" />
+                        <label for="collapse-equipment-toggle" class="collapse-title p-4 cursor-pointer">
+                            <div class="flex items-center justify-between">
+                                <h2 class="text-lg font-medium">Equipment</h2>
+                                <span class="text-sm text-muted">{{ equipment|length }} items</span>
+                            </div>
+                        </label>
+                        <div class="collapse-content p-0">
+                            <div class="overflow-x-auto p-4">
+                                <table class="table table-zebra w-full">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th class="text-right">Count</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% if equipment %}
+                                            {% for eq in equipment %}
+                                                <tr>
+                                                    <td>{{ eq.name }}</td>
+                                                    <td class="text-right">
+                                                        <span class="badge badge-outline">{{ eq.count|default:'' }}</span>
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        {% else %}
+                                            <tr>
+                                                <td colspan="2" class="text-center py-8 text-muted">No equipment found</td>
+                                            </tr>
+                                        {% endif %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="collapse bg-base-200 shadow-sm rounded-lg">
+                        <input id="collapse-locations-toggle" type="checkbox" class="sr-only" />
+                        <label for="collapse-locations-toggle" class="collapse-title p-4 cursor-pointer">
+                            <div class="flex items-center justify-between">
+                                <h2 class="text-lg font-medium">Locations</h2>
+                                <span class="text-sm text-muted">{{ locations|length }} locations</span>
+                            </div>
+                        </label>
+                        <div class="collapse-content p-0">
+                            <div class="overflow-x-auto p-4">
+                                <table class="table table-zebra w-full">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th class="text-right">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% if locations %}
+                                            {% for loc in locations %}
+                                                <tr>
+                                                    <td>{{ loc.name }}</td>
+                                                    <td class="text-right">
+                                                        <a href="#" class="btn btn-sm btn-ghost" onclick="return false">Edit</a>
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        {% else %}
+                                            <tr>
+                                                <td colspan="2" class="text-center py-8 text-muted">No locations found</td>
+                                            </tr>
+                                        {% endif %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+        </div>
+    </div>
+
+    <script src="{% static 'js/chores-open-edit.js' %}"></script>
+    <script src="{% static 'js/chores-recurrence.js' %}"></script>
+    <script src="{% static 'js/chores-tabs.js' %}"></script>
+    <script src="{% static 'js/notes-ui.js' %}"></script>
+    <script src="{% static 'js/steps-ui.js' %}"></script>
+{% endblock %}

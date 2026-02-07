@@ -4,4 +4,4 @@ TAILWIND_CLI_MODE = 'path'
 # We can optionally set TAILWIND_CLI_PATH if needed, but default is usually fine.
 # TAILWIND_CLI_PATH = env.str("TAILWIND_CLI_PATH", default=None)
 
-INTERNAL_IPS = ['127.0.0.1']
+TAILWIND_CLI_SRC_CSS = "assets/styles/daisyui.css"

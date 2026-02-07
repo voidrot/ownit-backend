@@ -1,7 +1,7 @@
-{% load static tailwind_cli %}
+{% load static %}
 {% load django_htmx %}
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="dark">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,7 +10,7 @@
             | Django Starter
         </title>
         <!-- Tailwind CSS -->
-        {% tailwind_css %}
+        <link rel="stylesheet" href="{% static 'css/tailwind.css' %}">
         <!-- HTMX -->
         {% django_htmx_script %}
         {% block extra_head %}{% endblock %}

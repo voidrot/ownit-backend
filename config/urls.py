@@ -9,14 +9,15 @@ from allauth.headless.contrib.ninja.security import x_session_token_auth
 
 api = NinjaAPI()
 
-api.add_router("/behavior/", behavior_router, auth=x_session_token_auth)
-api.add_router("/chores/", chores_router, auth=x_session_token_auth)
+api.add_router('/behavior/', behavior_router, auth=x_session_token_auth)
+api.add_router('/chores/', chores_router, auth=x_session_token_auth)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('allauth.urls')),
-    path("_allauth/", include("allauth.headless.urls")),
+    path('_allauth/', include('allauth.headless.urls')),
     path('', include('apps.pages.urls')),
+    path('portal/', include('apps.core.urls')),
     path('api/', api.urls),
 ]
 

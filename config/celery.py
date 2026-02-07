@@ -17,6 +17,7 @@ app.config_from_object('django.conf:settings', namespace='CELERY')
 # Load task modules from all registered Django apps.
 app.autodiscover_tasks()
 
+
 @setup_logging.connect
 def config_loggers(*args, **kwargs):
     from logging.config import dictConfig
@@ -24,6 +25,7 @@ def config_loggers(*args, **kwargs):
     from django.conf import settings
 
     dictConfig(settings.LOGGING)
+
 
 @app.task(bind=True)
 def debug_task(self):
