@@ -77,6 +77,10 @@ class Chore(models.Model):
         validators=[MinValueValidator(0)],
         help_text='Minimum age required to be assigned this chore (if age_restricted is True).',
     )
+    assign_to_all = models.BooleanField(
+        default=False, help_text='Whether this chore should be automatically assigned to all children when chores are assigned.'
+    )
+    disabled = models.BooleanField(default=False, help_text='Whether this chore is currently disabled and should not be assigned.')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

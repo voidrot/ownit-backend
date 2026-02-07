@@ -35,6 +35,8 @@ class ChoreForm(forms.ModelForm):
             'penalize_incomplete',
             'age_restricted',
             'minimum_age',
+            'assign_to_all',
+            'disabled',
             'penalty_amount',
             'is_recurring',
             'recurrence',
@@ -67,6 +69,8 @@ class ChoreForm(forms.ModelForm):
             'tasks': forms.SelectMultiple(attrs={'class': 'select select-bordered w-full'}),
             'age_restricted': forms.CheckboxInput(attrs={'class': 'checkbox'}),
             'minimum_age': forms.NumberInput(attrs={'class': 'input input-bordered w-40', 'min': 0}),
+            'assign_to_all': forms.CheckboxInput(attrs={'class': 'checkbox'}),
+            'disabled': forms.CheckboxInput(attrs={'class': 'checkbox'}),
             # notes will be populated by client UI as JSON; keep it hidden
             'notes': forms.HiddenInput(),
         }
