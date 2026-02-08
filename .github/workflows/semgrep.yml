@@ -2,11 +2,12 @@ on:
   workflow_dispatch: {}
   pull_request:
     branches-ignore:
-      - "release-please-*"
+      - release-please--branches--main
   push:
     branches:
       - main
       - master
+      - '!release-please--branches--main'
     paths:
       - .github/workflows/semgrep.yml
   schedule:
