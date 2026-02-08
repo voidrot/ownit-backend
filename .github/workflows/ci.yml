@@ -58,6 +58,9 @@ jobs:
       - name: Install dependencies
         run: uv sync --all-extras --dev
 
+      - name: Lint Django templates with djlint
+        run: uv run djlint --check .
+
       - name: Lint with Ruff
         run: uv run ruff check .
 
