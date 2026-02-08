@@ -33,7 +33,11 @@ class GroupAwareHeadlessAdapter(DefaultHeadlessAdapter):
         if account_settings.USER_MODEL_USERNAME_FIELD:
             kwargs['username'] = user_username(user)
         if user.pk:
-            email = EmailAddress.objects.get_primary_email(user)
+            try:
+                primary = EmailAddress.objects.filter(user=user, primary=True).first()
+                email = primary.email if primary else None
+            except Exception:
+                email = None
         else:
             email = None
         kwargs.update(

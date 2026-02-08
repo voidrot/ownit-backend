@@ -76,7 +76,7 @@ class ChoreForm(forms.ModelForm):
         }
 
     def clean(self):
-        cleaned = super().clean()
+        cleaned = super().clean() or {}
         recurrence = cleaned.get('recurrence')
 
         # Normalize empty weekday to None
@@ -146,12 +146,13 @@ class ChoreForm(forms.ModelForm):
             return []
         if isinstance(raw, list):
             return [str(x) for x in raw if x is not None and str(x).strip()]
-        try:
-            parsed = json.loads(raw)
-            if isinstance(parsed, list):
-                return [str(x) for x in parsed if x is not None and str(x).strip()]
-        except Exception:
-            pass
+        if isinstance(raw, (str, bytes, bytearray)):
+            try:
+                parsed = json.loads(raw)
+                if isinstance(parsed, list):
+                    return [str(x) for x in parsed if x is not None and str(x).strip()]
+            except Exception:
+                pass
         parts = [p.strip() for p in str(raw).replace('\r', '').split('\n') if p.strip()]
         if len(parts) == 1 and ',' in parts[0]:
             parts = [p.strip() for p in parts[0].split(',') if p.strip()]
@@ -185,13 +186,14 @@ class LocationForm(forms.ModelForm):
         if isinstance(raw, list):
             return [str(x) for x in raw if x is not None and str(x).strip()]
         # Try to parse JSON
-        try:
-            parsed = json.loads(raw)
-            if isinstance(parsed, list):
-                return [str(x) for x in parsed if x is not None and str(x).strip()]
-        except Exception:
-            # not JSON; fall back to splitting by newlines or commas
-            pass
+        if isinstance(raw, (str, bytes, bytearray)):
+            try:
+                parsed = json.loads(raw)
+                if isinstance(parsed, list):
+                    return [str(x) for x in parsed if x is not None and str(x).strip()]
+            except Exception:
+                # not JSON; fall back to splitting by newlines or commas
+                pass
         # Split on newlines or commas
         parts = [p.strip() for p in str(raw).replace('\r', '').split('\n') if p.strip()]
         if len(parts) == 1 and ',' in parts[0]:
@@ -225,12 +227,13 @@ class EquipmentForm(forms.ModelForm):
             return []
         if isinstance(raw, list):
             return [str(x) for x in raw if x is not None and str(x).strip()]
-        try:
-            parsed = json.loads(raw)
-            if isinstance(parsed, list):
-                return [str(x) for x in parsed if x is not None and str(x).strip()]
-        except Exception:
-            pass
+        if isinstance(raw, (str, bytes, bytearray)):
+            try:
+                parsed = json.loads(raw)
+                if isinstance(parsed, list):
+                    return [str(x) for x in parsed if x is not None and str(x).strip()]
+            except Exception:
+                pass
         parts = [p.strip() for p in str(raw).replace('\r', '').split('\n') if p.strip()]
         if len(parts) == 1 and ',' in parts[0]:
             parts = [p.strip() for p in parts[0].split(',') if p.strip()]
@@ -264,12 +267,13 @@ class TaskForm(forms.ModelForm):
             return []
         if isinstance(raw, list):
             return [str(x) for x in raw if x is not None and str(x).strip()]
-        try:
-            parsed = json.loads(raw)
-            if isinstance(parsed, list):
-                return [str(x) for x in parsed if x is not None and str(x).strip()]
-        except Exception:
-            pass
+        if isinstance(raw, (str, bytes, bytearray)):
+            try:
+                parsed = json.loads(raw)
+                if isinstance(parsed, list):
+                    return [str(x) for x in parsed if x is not None and str(x).strip()]
+            except Exception:
+                pass
         parts = [p.strip() for p in str(raw).replace('\r', '').split('\n') if p.strip()]
         if len(parts) == 1 and ',' in parts[0]:
             parts = [p.strip() for p in parts[0].split(',') if p.strip()]
@@ -287,10 +291,13 @@ class TaskForm(forms.ModelForm):
         if isinstance(raw, list):
             parsed = raw
         else:
-            try:
-                parsed = json.loads(raw)
-            except Exception:
-                # not JSON, treat as empty
+            if isinstance(raw, (str, bytes, bytearray)):
+                try:
+                    parsed = json.loads(raw)
+                except Exception:
+                    # not JSON, treat as empty
+                    return []
+            else:
                 return []
         if not isinstance(parsed, list):
             return []

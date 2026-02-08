@@ -13,6 +13,7 @@ from django.contrib.auth.decorators import login_required
 from apps.chores.models import Chore, Location, Equipment, Task
 from apps.chores.forms import ChoreForm, LocationForm, EquipmentForm, TaskForm
 from django.http import HttpResponseBadRequest
+from typing import Any, cast
 from django.http import JsonResponse
 
 
@@ -410,13 +411,15 @@ def users_view(request):
                 adapter.save_user(request, user, form, commit=True)
             except Exception:
                 # Fallback: save minimal fields if adapter.save_user isn't available
-                user.username = form.cleaned_data.get('username')
-                user.email = form.cleaned_data.get('email')
-                user.set_password(form.cleaned_data.get('password1'))
-                user.save()
+                u = cast(Any, user)
+                u.username = form.cleaned_data.get('username')
+                u.email = form.cleaned_data.get('email')
+                u.set_password(form.cleaned_data.get('password1'))
+                u.save()
 
             group = form.cleaned_data['group']
-            user.groups.add(group)
+            typed_user = cast(Any, user)
+            typed_user.groups.add(group)
 
             # Ensure allauth EmailAddress is set up if available
             try:
@@ -441,8 +444,9 @@ def users_view(request):
             try:
                 birth_date = form.cleaned_data.get('birth_date')
                 if birth_date:
-                    user.birth_date = birth_date
-                    user.save()
+                    typed_user = cast(Any, user)
+                    typed_user.birth_date = birth_date
+                    typed_user.save()
             except Exception:
                 # Non-fatal: ignore errors saving birth_date
                 pass
