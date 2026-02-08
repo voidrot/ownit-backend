@@ -1,6 +1,7 @@
 [tools]
 pre-commit = "latest"
 python = "3.14"
+semgrep = "latest"
 uv = "latest"
 
 [env]
@@ -11,37 +12,120 @@ _.python.venv = { path = ".venv", create = true }
 _.path = ".venv/bin"
 
 [tasks]
-install = { run = "uv sync", description = "Install dependencies" }
-serve = { run = "uv run python manage.py tailwind runserver 0.0.0.0:8000", description = "Run development server with Tailwind" }
-celery-worker = { run = "uv run celery -A config worker -l info", description = "Run celery worker" }
-celery-beat = { run = "uv run celery -A config beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler", description = "Run celery beat" }
-flower = { run = "uv run celery -A config flower", description = "Run flower" }
-tailwind-watch = { run = "uv run python manage.py tailwind watch", description = "Watch Tailwind changes" }
-tailwind-build = { run = "uv run python manage.py tailwind build", description = "Build Tailwind CSS" }
-test = { run = "uv run pytest", env = { DJANGO_ENV = "testing" }, description = "Run tests" }
-test-e2e = { run = "uv run pytest e2e", env = { DJANGO_ENV = "testing" }, description = "Run E2E tests" }
-lint = { run = [
-  "uv run ruff check .",
-  "uv run djlint . --check",
-  "uv run pyrefly check --summarize-errors",
-], description = "Run linting (Ruff + djlint + pyrefly)" }
-lint-types = { run = [
-  "uv run pyrefly check --summarize-errors",
-], description = "Run type linting (pyrefly)" }
-format = { run = [
-  "uv run ruff format .",
-  "uv run djlint . --reformat",
-], description = "Format code (Ruff + djlint)" }
-clean = { run = 'find . -type d -name "__pycache__" -exec rm -rf {} +', description = "Clean pycache" }
-docker-build = { run = "docker compose build", description = "Build docker images" }
-docker-up = { run = "docker compose -f compose.dev.yml up -d", description = "Start docker stack" }
-migrate = { run = "uv run python manage.py migrate", description = "Run database migrations" }
-dev = { run = [
-  { task = "docker-up" },
-  { task = "migrate"},
+
+[tasks.install]
+run = "uv sync"
+description = "Install dependencies"
+
+[tasks.serve]
+run = "uv run python manage.py tailwind runserver 0.0.0.0:8000"
+description = "Run development server with Tailwind"
+
+[tasks."celery:worker"]
+run = "watchmedo auto-restart --recursive --directory=./ --patterns='**/*.py' -- uv run celery -A config worker -l info"
+description = "Run celery worker"
+
+[tasks."celery:beat"]
+run = "watchmedo auto-restart --recursive --directory=./ --patterns='**/*.py' -- uv run celery -A config beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler"
+description = "Run celery beat"
+
+[tasks."celery:flower"]
+run = "uv run celery -A config flower"
+description = "Run flower"
+
+[tasks."tailwind:watch"]
+run = "uv run python manage.py tailwind watch"
+description = "Watch Tailwind changes"
+
+[tasks."tailwind:build"]
+run = "uv run python manage.py tailwind build"
+description = "Build Tailwind CSS"
+
+[tasks."test:unit"]
+run = "uv run pytest"
+env = { DJANGO_ENV = "testing" }
+description = "Run tests"
+
+[tasks."test:e2e"]
+run = "uv run pytest e2e"
+env = { DJANGO_ENV = "testing" }
+description = "Run E2E tests"
+
+[tasks.test]
+run = [{ task = "test:unit" }, { task = "test:e2e" }]
+description = "Run all tests (unit + E2E)"
+
+[tasks."format:ruff-format"]
+run = "uv run ruff format ."
+description = "Format code with Ruff"
+
+[tasks."format:ruff-fix"]
+run = "uv run ruff check . --fix"
+description = "Fix code with Ruff"
+
+[tasks."format:djlint"]
+run = "uv run djlint . --reformat"
+description = "Format code with djlint"
+
+[tasks.format]
+run = [{task = "format:ruff-fix"}, { task = "format:ruff-format" }, { task = "format:djlint" }]
+description = "Format code (Ruff + djlint)"
+
+[tasks.lint]
+run = [{ task = "lint:ruff-check" }, { task = "lint:ruff-format" }, { task = "lint:djlint" }, { task = "lint:types" }]
+description = "Run linting (Ruff + djlint + pyrefly)"
+
+[tasks."lint:types"]
+run = ["uv run pyrefly check --summarize-errors"]
+description = "Run type linting (pyrefly)"
+
+[tasks."lint:ruff-check"]
+run = "uv run ruff check ."
+description = "Run Ruff check"
+
+[tasks."lint:ruff-format"]
+run = "uv run ruff format . --check"
+description = "Run Ruff format check"
+
+[tasks."lint:djlint"]
+run = "uv run djlint . --check"
+description = "Run djlint check"
+
+[tasks.clean]
+run = 'find . -type d -name "__pycache__" -exec rm -rf {} +'
+description = "Clean pycache"
+
+# [tasks."docker:build"]
+# run = "docker compose build"
+# description = "Build docker images"
+
+[tasks."docker:up"]
+run = "docker compose -f compose.dev.yml up -d"
+description = "Start docker stack"
+
+[tasks."db:migrate"]
+run = "uv run python manage.py migrate"
+description = "Run database migrations"
+
+[tasks.dev]
+run = [
+  { task = "docker:up" },
+  { task = "db:migrate" },
   { tasks = [
     "serve",
-    "celery-worker",
-    "celery-beat",
-  ] }
-], description = "Run development environment (Docker + Django + Celery)" }
+    "celery:worker",
+    "celery:beat",
+  ] },
+]
+description = "Run development environment (Docker + Django + Celery)"
+
+[tasks."tasks:list"]
+run = "uv run celery inspect registered"
+description = "List registered Celery tasks"
+
+[tasks."tasks:run"]
+run = "uv run celery call ${usage_task_name}"
+description = "Run a specific Celery task (provide task_name env variable)"
+usage = '''
+arg "<task_name>" help="Name of the Celery task to run (e.g. chores.tasks.close_incomplete_chores)"
+'''

@@ -221,13 +221,14 @@
     </div>
     <script>
 document.addEventListener('DOMContentLoaded', function() {
-		// Element references (prefer name selectors as Django forms may wrap inputs)
-		const groupSelect = document.querySelector('select[name="group"]') || document.getElementById('{{ form.group.id_for_label }}');
-		const submitBtn = document.getElementById('create-user-btn');
-		const username = document.querySelector('input[name="username"]');
-		const email = document.querySelector('input[name="email"]');
-		const password1 = document.querySelector('input[name="password1"]');
-		const password2 = document.querySelector('input[name="password2"]');
+        // Element references: prefer fields inside the Create User form to avoid picking other modals' fields
+        const createForm = document.getElementById('create-user-form');
+        const submitBtn = document.getElementById('create-user-btn');
+        let groupSelect = (createForm && createForm.querySelector('select[name="group"]')) || document.querySelector('select[name="group"]') || document.getElementById('{{ form.group.id_for_label }}');
+        let username = (createForm && createForm.querySelector('input[name="username"]')) || document.querySelector('input[name="username"]') || document.getElementById('{{ form.username.id_for_label }}');
+        let email = (createForm && createForm.querySelector('input[name="email"]')) || document.querySelector('input[name="email"]') || document.getElementById('{{ form.email.id_for_label }}');
+        let password1 = (createForm && createForm.querySelector('input[name="password1"]')) || (createForm && createForm.querySelector('input[type="password"]')) || document.querySelector('input[name="password1"]') || document.getElementById('{{ form.password1.id_for_label }}');
+        let password2 = (createForm && createForm.querySelector('input[name="password2"]')) || (createForm && createForm.querySelectorAll('input[type="password"]') && createForm.querySelectorAll('input[type="password"]')[1]) || document.querySelector('input[name="password2"]') || document.getElementById('{{ form.password2.id_for_label }}');
 		const pwd1Error = document.getElementById('password1-error');
 		const pwd2Error = document.getElementById('password2-error');
 		const createBtnText = document.getElementById('create-btn-text');
@@ -235,46 +236,59 @@ document.addEventListener('DOMContentLoaded', function() {
 		const togglePwd1 = document.getElementById('toggle-password1');
 		const togglePwd2 = document.getElementById('toggle-password2');
 
-		function validatePasswordStrength() {
-				if (!password1) return true;
-				const val = password1.value || '';
-				if (val.length < 8) {
-						if (pwd1Error) pwd1Error.textContent = 'Password must be at least 8 characters.';
-						return false;
-				}
-				if (pwd1Error) pwd1Error.textContent = '';
-				return true;
-		}
+        function validatePasswordStrength() {
+            if (!password1) return false;
+            const val = (password1.value || '').trim();
+            if (val.length === 0) {
+                if (pwd1Error) pwd1Error.textContent = '';
+                return false;
+            }
+            if (val.length < 8) {
+                if (pwd1Error) pwd1Error.textContent = 'Password must be at least 8 characters.';
+                return false;
+            }
+            if (pwd1Error) pwd1Error.textContent = '';
+            return true;
+        }
 
-		function validatePasswordsMatch() {
-				if (!password1 || !password2) return true;
-				if (password1.value !== password2.value) {
-						if (pwd2Error) pwd2Error.textContent = 'Passwords do not match.';
-						return false;
-				}
-				if (pwd2Error) pwd2Error.textContent = '';
-				return true;
-		}
+        function validatePasswordsMatch() {
+            if (!password1 || !password2) return false;
+            const p1 = (password1.value || '').trim();
+            const p2 = (password2.value || '').trim();
+            if (p1.length === 0 || p2.length === 0) {
+                if (pwd2Error) pwd2Error.textContent = '';
+                return false;
+            }
+            if (p1 !== p2) {
+                if (pwd2Error) pwd2Error.textContent = 'Passwords do not match.';
+                return false;
+            }
+            if (pwd2Error) pwd2Error.textContent = '';
+            return true;
+        }
 
-		function validateEmail() {
-				if (!email) return true;
-				const v = (email.value || '').trim();
-				if (!v) return false;
-				const re = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
-				return re.test(v);
-		}
+        function validateEmail() {
+            if (!email) return true;
+            const v = (email.value || '').trim();
+            if (!v) return false;
+            const re = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+            return re.test(v);
+        }
 
-		function validateUsername() {
-				if (!username) return true;
-				return (username.value || '').trim().length > 0;
-		}
+        function validateUsername() {
+            if (!username) return true;
+            return (username.value || '').trim().length > 0;
+        }
 
-		function checkForm() {
-				if (!submitBtn) return;
-				const roleSelected = !!(groupSelect && groupSelect.value);
-				const ok = roleSelected && validateUsername() && validateEmail() && validatePasswordStrength() && validatePasswordsMatch();
-				submitBtn.disabled = !ok;
-		}
+        function checkForm() {
+            if (!submitBtn) return;
+            const roleSelected = !!(groupSelect && (groupSelect.value || '').toString().trim().length > 0);
+            const passStrength = validatePasswordStrength();
+            const passMatch = validatePasswordsMatch();
+            const ok = roleSelected && validateUsername() && validateEmail() && passStrength && passMatch;
+            // debug logging removed
+            submitBtn.disabled = !ok;
+        }
 
 		// Attach listeners
 		if (groupSelect) groupSelect.addEventListener('change', checkForm);

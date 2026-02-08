@@ -1,6 +1,8 @@
 import os
 from celery import Celery
 from celery.signals import setup_logging
+from celery.schedules import crontab
+
 
 # Set the default Django settings module for the 'celery' program.
 # Note: we point to 'config.settings' which uses split-settings
@@ -16,6 +18,11 @@ app.config_from_object('django.conf:settings', namespace='CELERY')
 
 # Load task modules from all registered Django apps.
 app.autodiscover_tasks()
+
+app.conf.beat_schedule = {
+    'close-days-chores': {'task': 'chores.tasks.close_days_chores', 'schedule': crontab(minute=0, hour=0)},
+    'assign-chores': {'task': 'chores.tasks.assign_chores', 'schedule': crontab(minute=30, hour=0)},
+}
 
 
 @setup_logging.connect

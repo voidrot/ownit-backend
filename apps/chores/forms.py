@@ -310,7 +310,7 @@ class TaskForm(forms.ModelForm):
                 continue
             steps.append({'name': name, 'description': str(desc), 'order': order if order is not None else i})
         # sort by order then reindex
-        steps.sort(key=lambda x: (x.get('order') if x.get('order') is not None else 0))
+        steps.sort(key=lambda x: x.get('order') if x.get('order') is not None else 0)
         for idx, s in enumerate(steps):
             s['order'] = idx
         return steps

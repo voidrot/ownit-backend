@@ -44,6 +44,7 @@ dev = [
   "pytest-django>=4.11.1",
   "pytest-playwright>=0.4.4",
   "ruff>=0.14.14",
+  "watchdog[watchmedo]>=6.0.0",
 ]
 
 [tool.uv]

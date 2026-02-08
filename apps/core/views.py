@@ -136,7 +136,8 @@ def save_chore(request):
         # Return the chores page with the bound form so validation errors are visible
         chores = Chore.objects.select_related('location').prefetch_related('equipment', 'tasks').all()
         locations = Location.objects.all()
-        equipment = Equipment.objects.all()
+        # Avoid N+1 when templates access equipment.location — join the FK here.
+        equipment = Equipment.objects.select_related('location').all()
         # Keep the same prefetch semantics when re-rendering on form errors
         tasks = Task.objects.prefetch_related('equipment__location').all()
         location_form = LocationForm()

@@ -6455,6 +6455,9 @@
   .h-32 {
     height: calc(var(--spacing) * 32);
   }
+  .max-h-\[50vh\] {
+    max-height: 50vh;
+  }
   .min-h-\[calc\(100vh-10rem\)\] {
     min-height: calc(100vh - 10rem);
   }
