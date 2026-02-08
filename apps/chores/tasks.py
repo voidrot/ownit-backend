@@ -63,8 +63,8 @@ def assign_chores() -> None:
     # - weekly recurring chores where the stored weekday matches today (e.g., "Monday")
     # - monthly recurring chores where the stored day-of-month matches today (e.g., "15")
     today = datetime.now(timezone.utc).date()
-    today_weekday = today.strftime('%A')
-    today_day_of_month = str(today.day)
+    today.strftime('%A')
+    str(today.day)
 
     # Optional deterministic seed for debugging/tests (set via env var)
     seed = os.environ.get('ASSIGN_CHORES_SEED')
@@ -117,8 +117,8 @@ def assign_chores() -> None:
         logger.exception('Failed to include previous 7 days completed counts; continuing without them.')
 
     # Use centralized recurrence filter helper
-    assign_to_all_chores: QuerySet[Chore, Chore] = (
-        Chore.objects.filter(disabled=False, assign_to_all=True).filter(chore_runs_today_q(today=today))
+    assign_to_all_chores: QuerySet[Chore, Chore] = Chore.objects.filter(disabled=False, assign_to_all=True).filter(
+        chore_runs_today_q(today=today)
     )
     # Assign chores flagged `assign_to_all` to every child. We create the
     # assignments and, on success, increment our in-memory counts so later
@@ -145,7 +145,7 @@ def assign_chores() -> None:
             if exists:
                 assignments_skipped_duplicate += 1
                 logger.debug(
-                    "Skipping duplicate assign-to-all for chore %s -> %s on %s",
+                    'Skipping duplicate assign-to-all for chore %s -> %s on %s',
                     chore.id,
                     child.id,
                     due_date.date(),
@@ -165,11 +165,7 @@ def assign_chores() -> None:
             # Update in-memory counts so weighting reflects these new assignments
             counts_map[child.id] = counts_map.get(child.id, 0) + 1
     # # Now we want to assign chores randomly to children. For chores that have a minimum age requirement, we should only assign to children who meet that requirement.
-    remaining_chores = (
-        Chore.objects.filter(disabled=False, assign_to_all=False).filter(chore_runs_today_q(today=today))
-    )
-    
-    
+    remaining_chores = Chore.objects.filter(disabled=False, assign_to_all=False).filter(chore_runs_today_q(today=today))
 
     def choose_weighted(candidates: list[User]) -> User | None:
         """Return a single candidate chosen with weights favoring fewer assignments.
@@ -189,7 +185,7 @@ def assign_chores() -> None:
         # Log debug info showing candidate counts and the chosen candidate to
         # aid in troubleshooting and understanding assignment decisions.
         logger.debug(
-            "choose_weighted: candidates=%s counts=%s weights=%s chosen=%s",
+            'choose_weighted: candidates=%s counts=%s weights=%s chosen=%s',
             [c.id for c in candidates],
             counts,
             [round(w, 3) for w in weights],
@@ -244,7 +240,7 @@ def assign_chores() -> None:
                 if exists:
                     assignments_skipped_duplicate += 1
                     logger.debug(
-                        "Skipping duplicate assignment for chore %s -> %s on %s",
+                        'Skipping duplicate assignment for chore %s -> %s on %s',
                         chore.id,
                         assignee.id,
                         due_date.date(),
@@ -266,7 +262,7 @@ def assign_chores() -> None:
 
                 # Summary logging for observability
                 logger.info(
-                    "Assignment summary: created=%d skipped_duplicates=%d failures=%d",
+                    'Assignment summary: created=%d skipped_duplicates=%d failures=%d',
                     assignments_created,
                     assignments_skipped_duplicate,
                     assignment_failures,
@@ -293,7 +289,7 @@ def assign_chores() -> None:
             if exists:
                 assignments_skipped_duplicate += 1
                 logger.debug(
-                    "Skipping duplicate assignment for chore %s -> %s on %s",
+                    'Skipping duplicate assignment for chore %s -> %s on %s',
                     chore.id,
                     assignee.id,
                     due_date.date(),

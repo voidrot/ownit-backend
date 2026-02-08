@@ -62,6 +62,7 @@ addopts = "--reuse-db"
 [tool.ruff]
 line-length = 120
 exclude = ["migrations"]
+extend-exclude = ["tests", "*_test.py"]
 
 [tool.ruff.format]
 quote-style = "single"

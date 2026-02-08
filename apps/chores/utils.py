@@ -38,7 +38,7 @@ def chore_runs_today_q(today: date | None = None) -> Q:
     """
     if today is None:
         today = datetime.now(timezone.utc).date()
-    weekday = today.strftime("%A")
+    weekday = today.strftime('%A')
     day_of_month = str(today.day)
 
     return (
