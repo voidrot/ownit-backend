@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.humanize',
     # Third-party
+    # 'ninja',
     'allauth',
     'allauth.account',
     'allauth.headless',
