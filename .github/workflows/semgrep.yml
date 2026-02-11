@@ -14,6 +14,9 @@ on:
   # random HH:MM to avoid a load spike on GitHub Actions at 00:00
   - cron: 12 21 * * *
 name: Semgrep
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 jobs:
   semgrep:
     name: semgrep/ci
