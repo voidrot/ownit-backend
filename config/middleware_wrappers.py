@@ -8,6 +8,7 @@ This module provides a lazy shim for the `allauth` AccountMiddleware that
 only imports the real middleware implementation when the middleware is
 actually instantiated/called.
 """
+
 from typing import Callable
 
 

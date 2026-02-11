@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import Optional
 
 from django.http import HttpRequest
@@ -20,17 +19,17 @@ from apps.core.api_schema import AuthErrorSchema, NotFoundSchema
 from apps.core.utils import is_child, is_parent
 from apps.users.models import User
 
-router = Router(tags=["Chores"])
+router = Router(tags=['Chores'])
 
 
 def _get_request_user(request: HttpRequest) -> Optional[User]:
     """Return the authenticated user if present."""
-    return getattr(request, "auth", None)
+    return getattr(request, 'auth', None)
 
 
 def _get_child_or_404(child_id: int) -> Optional[User]:
     """Return the active child user or None if not found."""
-    return User.objects.filter(id=child_id, groups__name="child", is_active=True).first()
+    return User.objects.filter(id=child_id, groups__name='child', is_active=True).first()
 
 
 def _file_url(request: HttpRequest, field) -> Optional[str]:
@@ -64,10 +63,10 @@ def _build_assignment_summary(assignment: Assignment) -> AssignmentSummarySchema
         approved=assignment.approved,
         closed=assignment.closed,
         chore={
-            "id": chore.id,
-            "name": chore.name,
-            "description": chore.description,
-            "points": chore.points,
+            'id': chore.id,
+            'name': chore.name,
+            'description': chore.description,
+            'points': chore.points,
         },
     )
 
@@ -140,97 +139,95 @@ def _build_chore_detail(request: HttpRequest, chore: Chore) -> ChoreDetailSchema
 
 
 @router.get(
-    "/children/{child_id}/assignments",
+    '/children/{child_id}/assignments',
     response={200: list[AssignmentSummarySchema], 403: AuthErrorSchema, 404: NotFoundSchema},
 )
 def list_child_assignments(request: HttpRequest, child_id: int):
     """Get all active assignments for a child."""
     user = _get_request_user(request)
     if not user:
-        return 403, {"message": "Unauthorized"}
+        return 403, {'message': 'Unauthorized'}
     if is_child(user) and user.id != child_id:
-        return 403, {"message": "Unauthorized"}
+        return 403, {'message': 'Unauthorized'}
     if not (is_child(user) or is_parent(user)):
-        return 403, {"message": "Unauthorized"}
+        return 403, {'message': 'Unauthorized'}
 
     child = _get_child_or_404(child_id)
     if not child:
-        return 404, {"message": "Child not found"}
+        return 404, {'message': 'Child not found'}
 
     assignments = (
-        Assignment.objects.filter(assigned_to=child, closed=False)
-        .select_related("chore")
-        .order_by("due_date")
+        Assignment.objects.filter(assigned_to=child, closed=False).select_related('chore').order_by('due_date')
     )
     return [_build_assignment_summary(assignment) for assignment in assignments]
 
 
-@router.get("/locations", response={200: list[LocationSchema], 403: AuthErrorSchema})
+@router.get('/locations', response={200: list[LocationSchema], 403: AuthErrorSchema})
 def list_locations(request: HttpRequest):
     """Get all available locations."""
     user = _get_request_user(request)
     if not user or not (is_child(user) or is_parent(user)):
-        return 403, {"message": "Unauthorized"}
+        return 403, {'message': 'Unauthorized'}
 
-    locations = Location.objects.order_by("name")
+    locations = Location.objects.order_by('name')
     return [_build_location_schema(location) for location in locations if location]
 
 
-@router.get("/equipment", response={200: list[EquipmentSchema], 403: AuthErrorSchema})
+@router.get('/equipment', response={200: list[EquipmentSchema], 403: AuthErrorSchema})
 def list_equipment(request: HttpRequest):
     """Get all available equipment."""
     user = _get_request_user(request)
     if not user or not (is_child(user) or is_parent(user)):
-        return 403, {"message": "Unauthorized"}
+        return 403, {'message': 'Unauthorized'}
 
-    equipment = Equipment.objects.select_related("location").order_by("name")
+    equipment = Equipment.objects.select_related('location').order_by('name')
     return [_build_equipment_schema(request, item) for item in equipment]
 
 
 @router.get(
-    "/chores/{id}",
+    '/chores/{id}',
     response={200: ChoreDetailSchema, 403: AuthErrorSchema, 404: NotFoundSchema},
 )
 def get_chore_detail(request: HttpRequest, id: int):
     """Get full chore data including equipment, tasks, and location."""
     user = _get_request_user(request)
     if not user or not (is_child(user) or is_parent(user)):
-        return 403, {"message": "Unauthorized"}
+        return 403, {'message': 'Unauthorized'}
 
     chore = (
         Chore.objects.filter(id=id)
-        .select_related("location")
-        .prefetch_related("equipment", "tasks", "tasks__equipment")
+        .select_related('location')
+        .prefetch_related('equipment', 'tasks', 'tasks__equipment')
         .first()
     )
     if not chore:
-        return 404, {"message": "Chore not found"}
+        return 404, {'message': 'Chore not found'}
 
     return _build_chore_detail(request, chore)
 
 
 @router.get(
-    "/assignments/{assignment_id}",
+    '/assignments/{assignment_id}',
     response={200: AssignmentDetailSchema, 403: AuthErrorSchema, 404: NotFoundSchema},
 )
 def get_assignment_detail(request: HttpRequest, assignment_id: int):
     """Get the status and details for a specific assignment."""
     user = _get_request_user(request)
     if not user:
-        return 403, {"message": "Unauthorized"}
+        return 403, {'message': 'Unauthorized'}
 
     assignment = (
         Assignment.objects.filter(id=assignment_id)
-        .select_related("chore", "assigned_to")
-        .prefetch_related("evidence")
+        .select_related('chore', 'assigned_to')
+        .prefetch_related('evidence')
         .first()
     )
     if not assignment:
-        return 404, {"message": "Assignment not found"}
+        return 404, {'message': 'Assignment not found'}
     if is_child(user) and assignment.assigned_to_id != user.id:
-        return 403, {"message": "Unauthorized"}
+        return 403, {'message': 'Unauthorized'}
     if not (is_child(user) or is_parent(user)):
-        return 403, {"message": "Unauthorized"}
+        return 403, {'message': 'Unauthorized'}
 
     summary = _build_assignment_summary(assignment)
     return AssignmentDetailSchema(
@@ -243,47 +240,47 @@ def get_assignment_detail(request: HttpRequest, assignment_id: int):
 
 
 @router.patch(
-    "/assignments/{assignment_id}/ready-for-approval",
+    '/assignments/{assignment_id}/ready-for-approval',
     response={200: AssignmentDetailSchema, 403: AuthErrorSchema, 404: NotFoundSchema, 409: ErrorSchema},
 )
 def mark_assignment_ready_for_approval(request: HttpRequest, assignment_id: int):
     """Allow a child to mark an assignment as ready for approval."""
     user = _get_request_user(request)
     if not user or not is_child(user):
-        return 403, {"message": "Unauthorized"}
+        return 403, {'message': 'Unauthorized'}
 
-    assignment = Assignment.objects.filter(id=assignment_id).select_related("assigned_to").first()
+    assignment = Assignment.objects.filter(id=assignment_id).select_related('assigned_to').first()
     if not assignment:
-        return 404, {"message": "Assignment not found"}
+        return 404, {'message': 'Assignment not found'}
     if assignment.assigned_to_id != user.id:
-        return 403, {"message": "Unauthorized"}
+        return 403, {'message': 'Unauthorized'}
     if assignment.closed or assignment.approved:
-        return 409, {"message": "Assignment is closed or already approved"}
+        return 409, {'message': 'Assignment is closed or already approved'}
 
     now = timezone.now()
     assignment.pending_approval = True
     assignment.is_completed = True
     assignment.completed_at = assignment.completed_at or now
-    assignment.save(update_fields=["pending_approval", "is_completed", "completed_at", "updated_at"])
+    assignment.save(update_fields=['pending_approval', 'is_completed', 'completed_at', 'updated_at'])
 
     return get_assignment_detail(request, assignment_id)
 
 
 @router.patch(
-    "/assignments/{assignment_id}/mark-incomplete",
+    '/assignments/{assignment_id}/mark-incomplete',
     response={200: AssignmentDetailSchema, 403: AuthErrorSchema, 404: NotFoundSchema, 409: ErrorSchema},
 )
 def mark_assignment_incomplete(request: HttpRequest, assignment_id: int):
     """Allow a parent to mark an assignment back to incomplete."""
     user = _get_request_user(request)
     if not user or not is_parent(user):
-        return 403, {"message": "Unauthorized"}
+        return 403, {'message': 'Unauthorized'}
 
     assignment = Assignment.objects.filter(id=assignment_id).first()
     if not assignment:
-        return 404, {"message": "Assignment not found"}
+        return 404, {'message': 'Assignment not found'}
     if assignment.closed:
-        return 409, {"message": "Assignment is closed"}
+        return 409, {'message': 'Assignment is closed'}
 
     assignment.pending_approval = False
     assignment.approved = False
@@ -294,14 +291,14 @@ def mark_assignment_incomplete(request: HttpRequest, assignment_id: int):
     assignment.closed_at = None
     assignment.save(
         update_fields=[
-            "pending_approval",
-            "approved",
-            "is_completed",
-            "completed_at",
-            "approved_at",
-            "closed",
-            "closed_at",
-            "updated_at",
+            'pending_approval',
+            'approved',
+            'is_completed',
+            'completed_at',
+            'approved_at',
+            'closed',
+            'closed_at',
+            'updated_at',
         ]
     )
 
@@ -309,20 +306,20 @@ def mark_assignment_incomplete(request: HttpRequest, assignment_id: int):
 
 
 @router.patch(
-    "/assignments/{assignment_id}/approve",
+    '/assignments/{assignment_id}/approve',
     response={200: AssignmentDetailSchema, 403: AuthErrorSchema, 404: NotFoundSchema, 409: ErrorSchema},
 )
 def approve_assignment(request: HttpRequest, assignment_id: int):
     """Allow a parent to approve and complete an assignment."""
     user = _get_request_user(request)
     if not user or not is_parent(user):
-        return 403, {"message": "Unauthorized"}
+        return 403, {'message': 'Unauthorized'}
 
     assignment = Assignment.objects.filter(id=assignment_id).first()
     if not assignment:
-        return 404, {"message": "Assignment not found"}
+        return 404, {'message': 'Assignment not found'}
     if assignment.closed:
-        return 409, {"message": "Assignment is closed"}
+        return 409, {'message': 'Assignment is closed'}
 
     now = timezone.now()
     assignment.approved = True
@@ -334,14 +331,14 @@ def approve_assignment(request: HttpRequest, assignment_id: int):
     assignment.closed_at = now
     assignment.save(
         update_fields=[
-            "approved",
-            "pending_approval",
-            "is_completed",
-            "completed_at",
-            "approved_at",
-            "closed",
-            "closed_at",
-            "updated_at",
+            'approved',
+            'pending_approval',
+            'is_completed',
+            'completed_at',
+            'approved_at',
+            'closed',
+            'closed_at',
+            'updated_at',
         ]
     )
 
@@ -349,7 +346,7 @@ def approve_assignment(request: HttpRequest, assignment_id: int):
 
 
 @router.post(
-    "/assignments/{assignment_id}/evidence",
+    '/assignments/{assignment_id}/evidence',
     response={201: EvidenceSchema, 400: ErrorSchema, 403: AuthErrorSchema, 404: NotFoundSchema, 409: ErrorSchema},
 )
 def upload_assignment_evidence(
@@ -361,28 +358,28 @@ def upload_assignment_evidence(
     """Attach photo or video evidence to an assignment."""
     user = _get_request_user(request)
     if not user:
-        return 403, {"message": "Unauthorized"}
+        return 403, {'message': 'Unauthorized'}
 
-    assignment = Assignment.objects.filter(id=assignment_id).select_related("assigned_to").first()
+    assignment = Assignment.objects.filter(id=assignment_id).select_related('assigned_to').first()
     if not assignment:
-        return 404, {"message": "Assignment not found"}
+        return 404, {'message': 'Assignment not found'}
     if is_child(user) and assignment.assigned_to_id != user.id:
-        return 403, {"message": "Unauthorized"}
+        return 403, {'message': 'Unauthorized'}
     if not (is_child(user) or is_parent(user)):
-        return 403, {"message": "Unauthorized"}
+        return 403, {'message': 'Unauthorized'}
     if assignment.closed or assignment.approved:
-        return 409, {"message": "Assignment is closed or approved"}
+        return 409, {'message': 'Assignment is closed or approved'}
     if not photo and not video:
-        return 400, {"message": "Photo or video evidence is required"}
+        return 400, {'message': 'Photo or video evidence is required'}
     if photo and video:
-        return 400, {"message": "Provide either a photo or a video, not both"}
+        return 400, {'message': 'Provide either a photo or a video, not both'}
 
     evidence = AssignmentEvidence.objects.create(assignment=assignment, photo=photo, video=video)
     return 201, _build_evidence_schema(request, evidence)
 
 
 @router.post(
-    "/assignments/{assignment_id}/evidence/batch",
+    '/assignments/{assignment_id}/evidence/batch',
     response={201: list[EvidenceSchema], 400: ErrorSchema, 403: AuthErrorSchema, 404: NotFoundSchema, 409: ErrorSchema},
 )
 def upload_assignment_evidence_batch(
@@ -394,28 +391,28 @@ def upload_assignment_evidence_batch(
     """Attach multiple photo or video evidence files to an assignment."""
     user = _get_request_user(request)
     if not user:
-        return 403, {"message": "Unauthorized"}
+        return 403, {'message': 'Unauthorized'}
 
-    assignment = Assignment.objects.filter(id=assignment_id).select_related("assigned_to").first()
+    assignment = Assignment.objects.filter(id=assignment_id).select_related('assigned_to').first()
     if not assignment:
-        return 404, {"message": "Assignment not found"}
+        return 404, {'message': 'Assignment not found'}
     if is_child(user) and assignment.assigned_to_id != user.id:
-        return 403, {"message": "Unauthorized"}
+        return 403, {'message': 'Unauthorized'}
     if not (is_child(user) or is_parent(user)):
-        return 403, {"message": "Unauthorized"}
+        return 403, {'message': 'Unauthorized'}
     if assignment.closed or assignment.approved:
-        return 409, {"message": "Assignment is closed or approved"}
+        return 409, {'message': 'Assignment is closed or approved'}
 
-    if photos is None or photos.__class__.__name__ == "File":
+    if photos is None or photos.__class__.__name__ == 'File':
         photos = []
-    if videos is None or videos.__class__.__name__ == "File":
+    if videos is None or videos.__class__.__name__ == 'File':
         videos = []
     if isinstance(photos, UploadedFile):
         photos = [photos]
     if isinstance(videos, UploadedFile):
         videos = [videos]
     if not photos and not videos:
-        return 400, {"message": "At least one photo or video is required"}
+        return 400, {'message': 'At least one photo or video is required'}
 
     created = []
     for photo in photos:
@@ -427,55 +424,55 @@ def upload_assignment_evidence_batch(
 
 
 @router.get(
-    "/assignments/{assignment_id}/evidence/{evidence_id}",
+    '/assignments/{assignment_id}/evidence/{evidence_id}',
     response={200: EvidenceSchema, 403: AuthErrorSchema, 404: NotFoundSchema},
 )
 def get_assignment_evidence(request: HttpRequest, assignment_id: int, evidence_id: int):
     """Get the URL for a specific evidence item."""
     user = _get_request_user(request)
     if not user:
-        return 403, {"message": "Unauthorized"}
+        return 403, {'message': 'Unauthorized'}
 
     evidence = (
         AssignmentEvidence.objects.filter(id=evidence_id, assignment_id=assignment_id)
-        .select_related("assignment__assigned_to")
+        .select_related('assignment__assigned_to')
         .first()
     )
     if not evidence:
-        return 404, {"message": "Evidence not found"}
+        return 404, {'message': 'Evidence not found'}
     if is_child(user) and evidence.assignment.assigned_to_id != user.id:
-        return 403, {"message": "Unauthorized"}
+        return 403, {'message': 'Unauthorized'}
     if not (is_child(user) or is_parent(user)):
-        return 403, {"message": "Unauthorized"}
+        return 403, {'message': 'Unauthorized'}
 
     return _build_evidence_schema(request, evidence)
 
 
 @router.delete(
-    "/assignments/{assignment_id}/evidence/{evidence_id}",
+    '/assignments/{assignment_id}/evidence/{evidence_id}',
     response={204: None, 403: AuthErrorSchema, 404: NotFoundSchema, 409: ErrorSchema},
 )
 def delete_assignment_evidence(request: HttpRequest, assignment_id: int, evidence_id: int):
     """Delete evidence before the assignment is complete or closed."""
     user = _get_request_user(request)
     if not user:
-        return 403, {"message": "Unauthorized"}
+        return 403, {'message': 'Unauthorized'}
 
     evidence = (
         AssignmentEvidence.objects.filter(id=evidence_id, assignment_id=assignment_id)
-        .select_related("assignment__assigned_to")
+        .select_related('assignment__assigned_to')
         .first()
     )
     if not evidence:
-        return 404, {"message": "Evidence not found"}
+        return 404, {'message': 'Evidence not found'}
 
     assignment = evidence.assignment
     if is_child(user) and assignment.assigned_to_id != user.id:
-        return 403, {"message": "Unauthorized"}
+        return 403, {'message': 'Unauthorized'}
     if not (is_child(user) or is_parent(user)):
-        return 403, {"message": "Unauthorized"}
+        return 403, {'message': 'Unauthorized'}
     if assignment.is_completed or assignment.closed or assignment.approved:
-        return 409, {"message": "Evidence cannot be deleted after completion"}
+        return 409, {'message': 'Evidence cannot be deleted after completion'}
 
     evidence.delete()
     return 204, None

@@ -434,15 +434,13 @@ def _create_equipment(locations: dict[str, Location], command: BaseCommand) -> d
     return equipment
 
 
-def _create_tasks(
-    equipment_lookup: dict[str, Equipment], command: BaseCommand
-) -> dict[str, Task]:
+def _create_tasks(equipment_lookup: dict[str, Equipment], command: BaseCommand) -> dict[str, Task]:
     """
     Create chore task records with steps.
     """
     tasks = {}
     for chore in CHORE_DEFINITIONS:
-        task_name = f"{chore['name']} Steps"
+        task_name = f'{chore["name"]} Steps'
         task, created = Task.objects.update_or_create(
             name=task_name,
             defaults={
@@ -471,7 +469,7 @@ def _create_chores(
     for chore in CHORE_DEFINITIONS:
         location = locations.get(chore['location'])
         if location is None:
-            raise CommandError(f"Missing location for chore {chore['name']}: {chore['location']}")
+            raise CommandError(f'Missing location for chore {chore["name"]}: {chore["location"]}')
 
         defaults = {
             'description': chore['description'],
@@ -491,7 +489,7 @@ def _create_chores(
             defaults=defaults,
         )
         if created:
-            command.stdout.write(command.style.SUCCESS(f"Created chore {chore['name']}."))
+            command.stdout.write(command.style.SUCCESS(f'Created chore {chore["name"]}.'))
 
         equipment_items = [equipment_lookup[name] for name in chore['equipment'] if name in equipment_lookup]
         chore_obj.equipment.set(equipment_items)
